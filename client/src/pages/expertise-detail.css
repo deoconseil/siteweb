@@ -1,0 +1,387 @@
+/* ═══════════════════════════
+   EXPERTISE DETAIL PAGES
+═══════════════════════════ */
+
+.expertise-detail {
+  font-family: 'Space Grotesk', sans-serif;
+  color: var(--dark);
+}
+
+/* HERO */
+.ed-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 520px;
+  overflow: hidden;
+}
+.ed-hero-content {
+  padding: 80px 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  background: #faf8f5;
+}
+.ed-hero-breadcrumb {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(0,0,0,0.4);
+}
+.ed-hero-breadcrumb a {
+  color: var(--red);
+  text-decoration: none;
+}
+.ed-hero-breadcrumb a:hover {
+  text-decoration: underline;
+}
+.ed-hero-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(40px, 5vw, 64px);
+  font-weight: 400;
+  line-height: 1.05;
+  color: var(--dark);
+  letter-spacing: -0.02em;
+}
+.ed-hero-subtitle {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(16px, 2vw, 22px);
+  font-style: italic;
+  color: var(--red);
+  line-height: 1.4;
+}
+.ed-hero-desc {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #555;
+  max-width: 520px;
+}
+.ed-hero-cta {
+  display: inline-block;
+  background: var(--red);
+  color: #fff;
+  padding: 14px 32px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background .3s;
+  align-self: flex-start;
+}
+.ed-hero-cta:hover {
+  background: #8a1522;
+}
+.ed-hero-image {
+  position: relative;
+  overflow: hidden;
+}
+.ed-hero-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* APPROACH */
+.ed-approach {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  background: #fff;
+}
+.ed-approach-image {
+  overflow: hidden;
+  min-height: 400px;
+}
+.ed-approach-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.ed-approach-content {
+  padding: 80px 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 24px;
+}
+.ed-approach-content h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(28px, 3vw, 40px);
+  font-weight: 900;
+  color: var(--dark);
+  letter-spacing: -0.02em;
+}
+.ed-approach-content p {
+  font-size: 15px;
+  line-height: 1.85;
+  color: #555;
+}
+
+/* BENEFITS */
+.ed-benefits {
+  padding: 96px 60px;
+  background: var(--dark);
+  color: #fff;
+}
+.ed-benefits h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(28px, 3vw, 40px);
+  font-weight: 900;
+  text-align: center;
+  margin-bottom: 60px;
+  letter-spacing: -0.02em;
+}
+.ed-benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.ed-benefit-card {
+  padding: 48px 32px;
+  background: rgba(255,255,255,0.06);
+  border-top: 3px solid rgba(255,255,255,0.1);
+  transition: all .3s ease;
+}
+.ed-benefit-card:hover {
+  background: var(--red);
+}
+.ed-benefit-icon {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 48px;
+  font-weight: 900;
+  color: var(--red);
+  line-height: 1;
+  margin-bottom: 20px;
+  transition: color .3s;
+}
+.ed-benefit-card:hover .ed-benefit-icon {
+  color: rgba(255,255,255,0.5);
+}
+.ed-benefit-card h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #fff;
+}
+.ed-benefit-card p {
+  font-size: 13px;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.7);
+}
+.ed-benefit-card:hover p {
+  color: rgba(255,255,255,0.9);
+}
+
+/* USE CASES */
+.ed-cases {
+  padding: 96px 60px;
+  background: #faf8f5;
+}
+.ed-cases h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(28px, 3vw, 40px);
+  font-weight: 900;
+  text-align: center;
+  margin-bottom: 60px;
+  color: var(--dark);
+  letter-spacing: -0.02em;
+}
+.ed-cases-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.ed-case-card {
+  background: #fff;
+  padding: 40px 32px;
+  border-top: 3px solid var(--red);
+  transition: transform .3s, box-shadow .3s;
+}
+.ed-case-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+}
+.ed-case-num {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 36px;
+  font-weight: 900;
+  color: rgba(0,0,0,0.06);
+  margin-bottom: 16px;
+}
+.ed-case-card h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 20px;
+}
+.ed-case-context,
+.ed-case-result {
+  margin-bottom: 16px;
+}
+.ed-case-context span,
+.ed-case-result span {
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.ed-case-context span {
+  color: rgba(0,0,0,0.35);
+}
+.ed-case-result span {
+  color: var(--red);
+}
+.ed-case-context p,
+.ed-case-result p {
+  font-size: 13px;
+  line-height: 1.7;
+  color: #555;
+}
+
+/* QUOTE */
+.ed-quote {
+  padding: 80px 60px;
+  background: var(--red);
+  text-align: center;
+}
+.ed-quote blockquote {
+  max-width: 800px;
+  margin: 0 auto;
+}
+.ed-quote p {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(20px, 2.5vw, 32px);
+  font-style: italic;
+  line-height: 1.5;
+  color: #fff;
+  margin-bottom: 24px;
+}
+.ed-quote cite {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+}
+
+/* NAVIGATION INTER-EXPERTISES */
+.ed-nav-expertises {
+  padding: 96px 60px;
+  background: #fff;
+}
+.ed-nav-expertises h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(28px, 3vw, 40px);
+  font-weight: 900;
+  text-align: center;
+  margin-bottom: 60px;
+  color: var(--dark);
+  letter-spacing: -0.02em;
+}
+.ed-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.ed-nav-card {
+  display: block;
+  padding: 36px 28px;
+  background: #faf8f5;
+  border: 2px solid transparent;
+  text-decoration: none;
+  transition: all .3s ease;
+  position: relative;
+}
+.ed-nav-card:hover {
+  border-color: var(--red);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+.ed-nav-card.ed-nav-active {
+  border-color: var(--red);
+  background: rgba(184,28,46,0.04);
+}
+.ed-nav-card h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 8px;
+}
+.ed-nav-card p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #777;
+  margin-bottom: 16px;
+}
+.ed-nav-arrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--red);
+}
+.ed-nav-active .ed-nav-arrow {
+  color: rgba(0,0,0,0.3);
+}
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 1024px) {
+  .ed-hero { grid-template-columns: 1fr; }
+  .ed-hero-image { min-height: 300px; }
+  .ed-hero-content { padding: 60px 40px; }
+  .ed-approach { grid-template-columns: 1fr; }
+  .ed-approach-image { min-height: 280px; }
+  .ed-approach-content { padding: 60px 40px; }
+  .ed-benefits { padding: 72px 40px; }
+  .ed-benefits-grid { grid-template-columns: repeat(2, 1fr); }
+  .ed-cases { padding: 72px 40px; }
+  .ed-cases-grid { grid-template-columns: 1fr; }
+  .ed-quote { padding: 60px 40px; }
+  .ed-nav-expertises { padding: 72px 40px; }
+  .ed-nav-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .ed-hero { grid-template-columns: 1fr; }
+  .ed-hero-image { min-height: 260px; order: -1; }
+  .ed-hero-content { padding: 48px 24px; }
+  .ed-hero-title { font-size: clamp(32px, 8vw, 48px); }
+  .ed-approach { grid-template-columns: 1fr; }
+  .ed-approach-image { min-height: 240px; }
+  .ed-approach-content { padding: 48px 24px; }
+  .ed-benefits { padding: 56px 24px; }
+  .ed-benefits-grid { grid-template-columns: repeat(2, 1fr); }
+  .ed-benefit-card { padding: 36px 24px; }
+  .ed-cases { padding: 56px 24px; }
+  .ed-cases-grid { grid-template-columns: 1fr; gap: 20px; }
+  .ed-quote { padding: 56px 24px; }
+  .ed-nav-expertises { padding: 56px 24px; }
+  .ed-nav-grid { grid-template-columns: 1fr; gap: 16px; }
+}
+
+@media (max-width: 480px) {
+  .ed-hero-content { padding: 40px 20px; }
+  .ed-hero-image { min-height: 220px; }
+  .ed-hero-title { font-size: 28px; }
+  .ed-approach-content { padding: 40px 20px; }
+  .ed-benefits { padding: 48px 16px; }
+  .ed-benefits-grid { grid-template-columns: 1fr; }
+  .ed-benefit-card { padding: 28px 20px; }
+  .ed-cases { padding: 48px 16px; }
+  .ed-quote { padding: 40px 16px; }
+  .ed-nav-expertises { padding: 48px 16px; }
+  .ed-nav-grid { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,14 @@
+Pattern FabrikRH à reproduire :
+
+SECTION INTRO (pi-section pi-section--cream):
+  pi-inner:
+    span.pi-tag → "NOTRE THINK TANK" (centré, bordure rouge, petites majuscules)
+    h2.pi-title → "Qu'est-ce que la" + span.pi-red "Fabrik RH" + "?" (Bebas Neue, centré)
+    p.pi-text → paragraphes justifiés, centrés, largeur max confortable
+
+Classes CSS clés:
+- pi-tag : bordure rouge, centré, petites majuscules
+- pi-title : Bebas Neue, centré
+- pi-red : couleur rouge #C8102E
+- pi-text : justifié, centré, max-width
+- pi-section--cream : fond crème

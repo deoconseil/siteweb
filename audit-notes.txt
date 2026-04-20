@@ -1,0 +1,34 @@
+AUDIT VISUEL COMPLET - DEO CONSEIL
+====================================
+
+RÉSUMÉ DES CORRECTIONS APPLIQUÉES:
+
+1. HERO CTA: Boutons "Nos expertises" et "Parlons-en" - flex-wrap: nowrap, white-space: nowrap, flex-shrink: 0, même height 44px, même padding 0 28px. Alignement forcé sur une seule ligne.
+
+2. SECTION DIFFÉRENCIATION: Refonte complète
+   - Ajout sous-titre descriptif
+   - Remplacement des numéros (01-06) par des icônes visuelles (★ ❤ ✦ ◈ ⚒ ✓)
+   - Texte raccourci (1 phrase par carte au lieu de 2-3)
+   - Séparateurs verticaux entre les stats
+   - Design plus aéré (padding réduit)
+
+3. LOGOS CLIENTS: Cartes fond blanc (#fff) - déjà corrigé au checkpoint précédent
+
+4. FOOTER: Fond #1a1a1a, texte blanc - déjà corrigé au checkpoint précédent
+
+VÉRIFICATIONS BRANDING INTER-PAGES:
+- Toutes les pages (ADN, Missions, Expertises, FabrikRH, Blog) utilisent:
+  - Le même Layout.tsx (header + nav + footer)
+  - Le même SiteFooter.tsx
+  - Le même NewsletterSection.tsx
+  - Les mêmes polices (Bebas Neue + Space Grotesk uniquement)
+- ExpertiseDetail n'a pas de NewsletterSection mais a le SiteFooter
+- Aucune police étrangère détectée (119 occurrences Bebas/Space Grotesk dans CSS)
+
+NEWSLETTER:
+- Design cohérent: fond #1a1a1a, accent rouge, titre Bebas Neue, texte Space Grotesk
+- Responsive 768px: flex-direction column, bouton full-width
+- Proportions OK
+
+TESTS: 98/98 passés
+TYPESCRIPT: 0 erreurs
