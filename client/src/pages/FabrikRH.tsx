@@ -192,12 +192,12 @@ export default function FabrikRH() {
     formData.append("file", file);
     formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
     formData.append("folder", "deo-conseil/fabrik-rh/cv");
-    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`, {
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/raw/upload`, {
       method: "POST",
       body: formData,
     });
     if (!response.ok) {
-      throw new Error("Échec de l'upload du CV.");
+      throw new Error("Échec de l'upload du CV. Vous pouvez coller un lien Drive/Dropbox dans le champ lien CV.");
     }
     const data = await response.json() as { secure_url?: string; url?: string };
     const uploadedUrl = data.secure_url || data.url || "";
@@ -658,4 +658,3 @@ export default function FabrikRH() {
     </>
   );
 }
-

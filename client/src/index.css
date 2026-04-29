@@ -11342,6 +11342,16 @@ img, video, iframe { max-width: 100%; }
   outline: none;
 }
 
+.fabrik-popup-field select {
+  color: #fff;
+  background-color: #1a1a1a;
+}
+
+.fabrik-popup-field select option {
+  color: #111;
+  background: #fff;
+}
+
 .fabrik-popup-field input:focus,
 .fabrik-popup-field select:focus,
 .fabrik-popup-field textarea:focus {
