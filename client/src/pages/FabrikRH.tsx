@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import SiteFooter from "@/components/SiteFooter";
 import ActualitesSection from "@/components/ActualitesSection";
 import NewsletterSection from "@/components/NewsletterSection";
@@ -107,22 +107,11 @@ const initialFormState: FabrikFormState = {
 
 export default function FabrikRH() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-  const [showPopup, setShowPopup] = useState(false);
   const [step, setStep] = useState(1);
   const [status, setStatus] = useState<FabrikStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
   const [formState, setFormState] = useState<FabrikFormState>(initialFormState);
   const [cvFile, setCvFile] = useState<File | null>(null);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowPopup(true);
-      setStep(1);
-      setStatus("idle");
-      setErrorMessage("");
-    }, 450);
-    return () => clearTimeout(timer);
-  }, []);
 
   const toggleItem = (index: number) => {
     setOpenIndex((prev) => (prev === index ? null : index));
@@ -180,11 +169,6 @@ export default function FabrikRH() {
   const handlePrev = () => {
     setErrorMessage("");
     setStep((prev) => Math.max(1, prev - 1));
-  };
-
-  const handleClosePopup = () => {
-    setShowPopup(false);
-    setErrorMessage("");
   };
 
   const uploadCvToCloudinary = async (file: File): Promise<string> => {
@@ -249,7 +233,7 @@ export default function FabrikRH() {
         entreprise: formState.secteurActivite.trim(),
         fonction: formState.fonctionActuelle.trim(),
         interet: formState.sujetsInteret.trim(),
-        source: "fabrik-popup-3-etapes",
+        source: "fabrik-page-3-etapes",
       };
 
       const res = await gasPost(payload);
@@ -404,9 +388,7 @@ export default function FabrikRH() {
               DRH, dirigeants, consultants et experts RH du Maroc, d'Afrique et d'Europe
               — unis autour d'une vision commune du capital humain.
             </p>
-            <button type="button" className="fabrik-photo-immersive__btn" onClick={() => setShowPopup(true)}>
-              Rejoindre la communauté →
-            </button>
+            <a className="fabrik-photo-immersive__btn" href="#fabrik-formulaire">Rejoindre la communauté →</a>
           </div>
         </div>
 
@@ -438,19 +420,15 @@ export default function FabrikRH() {
                 <p>Frameworks et templates à utiliser</p>
               </div>
             </div>
-            <div className="fabrik-popup-cta-wrap">
-              <button type="button" className="fabrik-popup-open-btn" onClick={() => setShowPopup(true)}>
-                Ouvrir le formulaire d'inscription (3 étapes)
-              </button>
-            </div>
+            <p className="pi-text pi-text--light" style={{ textAlign: "center" }}>
+              Formulaire d'inscription ci-dessous.
+            </p>
           </div>
         </section>
       </div>
 
-      {showPopup && (
-        <div className="fabrik-popup-overlay" onClick={handleClosePopup}>
-          <div className="fabrik-popup" onClick={(e) => e.stopPropagation()}>
-            <button className="fabrik-popup-close" onClick={handleClosePopup} type="button">×</button>
+      <div id="fabrik-formulaire" className="fabrik-popup-overlay fabrik-popup-overlay--inline">
+          <div className="fabrik-popup fabrik-popup--inline">
             <div className="fabrik-popup-brand">LA FABRIK RH</div>
             <h3 className="fabrik-popup-title">Rejoindre la communauté</h3>
             <p className="fabrik-popup-step">{stepTitle}</p>
@@ -466,7 +444,7 @@ export default function FabrikRH() {
                   onClick={() => {
                     setStatus("idle");
                     setStep(1);
-                    handleClosePopup();
+                    setErrorMessage("");
                   }}
                 >
                   Fermer
@@ -649,7 +627,6 @@ export default function FabrikRH() {
             )}
           </div>
         </div>
-      )}
 
       <NewsletterSection />
       <ActualitesSection />
@@ -657,3 +634,5 @@ export default function FabrikRH() {
     </>
   );
 }
+
+
