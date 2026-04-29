@@ -35,6 +35,13 @@ const RED   = "#C8102E";
 const DARK  = "#1a1a1a";
 const LIGHT = "#f5f5f5";
 
+const FABRIK_RH_HEADERS = [
+  "ID", "Date", "Prenom", "Nom", "Email", "Telephone", "Ville",
+  "FonctionActuelle", "ExperienceRH", "SecteurActivite", "DomainesExpertise",
+  "RoleSouhaite", "Motivation", "SujetsInteret", "ContenuRH", "LienReference",
+  "LinkedIn", "CVUrl", "Consentement", "ValidationDate", "Statut"
+];
+
 // ══════════════════════════════════════════════════════════════════
 //  POINT D'ENTRÉE HTTP
 // ══════════════════════════════════════════════════════════════════
@@ -86,6 +93,7 @@ function doPost(e) {
       case "saveBlog":        return jsonOk(saveBlog(body));
       case "saveActualite":   return jsonOk(saveActualite(body));
       case "saveReference":   return jsonOk(saveReference(body));
+      case "updateFabrikStatus": return jsonOk(updateFabrikStatus(body.id, body.statut));
       default:                return jsonError("Action inconnue: " + action);
     }
   } catch (err) {
@@ -104,13 +112,14 @@ function getSheet(name) {
     sheet = ss.insertSheet(name);
     initSheet(sheet, name);
   }
+  ensureSheetHeaders(sheet, name);
   return sheet;
 }
 
 function initSheet(sheet, name) {
   const headers = {
     Contacts:   ["ID","Date","Nom","Email","Telephone","Sujet","Message","Statut"],
-    FabrikRH:   ["ID","Date","Prenom","Nom","Email","Telephone","Entreprise","Fonction","Interet","Statut"],
+    FabrikRH:   FABRIK_RH_HEADERS,
     Catalogue:  ["ID","Date","Nom","Prenom","Email","Telephone","Entreprise","Fonction","Statut"],
     Newsletter: ["ID","Date","Email","Statut"],
     Blog:       ["ID","Date","Titre","Slug","Auteur","Categorie","Tags","Extrait","Contenu","Image","Publie"],
@@ -125,6 +134,48 @@ function initSheet(sheet, name) {
       .setFontWeight("bold");
     sheet.setFrozenRows(1);
   }
+}
+
+function ensureSheetHeaders(sheet, name) {
+  const headersBySheet = {
+    Contacts:   ["ID","Date","Nom","Email","Telephone","Sujet","Message","Statut"],
+    FabrikRH:   FABRIK_RH_HEADERS,
+    Catalogue:  ["ID","Date","Nom","Prenom","Email","Telephone","Entreprise","Fonction","Statut"],
+    Newsletter: ["ID","Date","Email","Statut"],
+    Blog:       ["ID","Date","Titre","Slug","Auteur","Categorie","Tags","Extrait","Contenu","Image","Publie"],
+    Actualites: ["ID","Date","Titre","Slug","Categorie","Tags","Extrait","Contenu","Image","Publie"],
+    References: ["ID","Date","Nom","Logo","Actif"],
+  };
+  const expectedHeaders = headersBySheet[name];
+  if (!expectedHeaders) return;
+
+  const lastCol = Math.max(sheet.getLastColumn(), 1);
+  const currentHeaders = sheet.getRange(1, 1, 1, lastCol).getValues()[0].map((v) => String(v || "").trim());
+
+  if (currentHeaders.every((header) => !header)) {
+    sheet.getRange(1, 1, 1, expectedHeaders.length).setValues([expectedHeaders]);
+    sheet.getRange(1, 1, 1, expectedHeaders.length)
+      .setBackground("#C8102E")
+      .setFontColor("#ffffff")
+      .setFontWeight("bold");
+    sheet.setFrozenRows(1);
+    return;
+  }
+
+  let colIndex = currentHeaders.length;
+  expectedHeaders.forEach((header) => {
+    if (!currentHeaders.includes(header)) {
+      colIndex += 1;
+      sheet.getRange(1, colIndex).setValue(header);
+      sheet.getRange(1, colIndex)
+        .setBackground("#C8102E")
+        .setFontColor("#ffffff")
+        .setFontWeight("bold");
+      currentHeaders.push(header);
+    }
+  });
+
+  sheet.setFrozenRows(1);
 }
 
 function sheetToObjects(sheet) {
@@ -193,18 +244,32 @@ function deleteContact(id) {
 function submitFabrikRH(body) {
   const sheet = getSheet("FabrikRH");
   const id = generateId();
-  const row = [
-    id,
-    nowStr(),
-    body.prenom || "",
-    body.nom || "",
-    body.email || "",
-    body.telephone || "",
-    body.entreprise || "",
-    body.fonction || "",
-    body.interet || "",
-    "Nouveau"
-  ];
+  const domainesExpertise = body.domainesExpertise || body.interet || "";
+  const sujetsInteret = body.sujetsInteret || body.interet || "";
+  const rowData = {
+    ID: id,
+    Date: nowStr(),
+    Prenom: body.prenom || "",
+    Nom: body.nom || "",
+    Email: body.email || "",
+    Telephone: body.telephone || "",
+    Ville: body.ville || "",
+    FonctionActuelle: body.fonctionActuelle || body.fonction || "",
+    ExperienceRH: body.experienceRh || "",
+    SecteurActivite: body.secteurActivite || body.entreprise || "",
+    DomainesExpertise: domainesExpertise,
+    RoleSouhaite: body.roleSouhaite || "",
+    Motivation: body.motivation || "",
+    SujetsInteret: sujetsInteret,
+    ContenuRH: body.contenuRh || "",
+    LienReference: body.lienReference || "",
+    LinkedIn: body.linkedin || "",
+    CVUrl: body.cvUrl || "",
+    Consentement: body.consentement || "",
+    ValidationDate: "",
+    Statut: "Nouveau"
+  };
+  const row = FABRIK_RH_HEADERS.map((header) => rowData[header] || "");
   sheet.appendRow(row);
 
   sendEmail(ADMIN_EMAIL, `🏭 Nouvelle demande Fabrik RH — ${body.prenom} ${body.nom}`, emailFabrikAdmin(body));
@@ -221,6 +286,30 @@ function getFabrikRH() {
 
 function deleteFabrik(id) {
   return deleteRowById("FabrikRH", id);
+}
+
+function updateFabrikStatus(id, statut) {
+  const sheet = getSheet("FabrikRH");
+  const rows = sheetToObjects(sheet);
+  const row = rows.find((r) => r.ID === id);
+  if (!row) return { success: false, error: "Non trouvÃ©" };
+
+  const statusRaw = String(statut || "").toLowerCase();
+  let nextStatus = "Nouveau";
+  if (statusRaw.includes("valid")) nextStatus = "Profil validé";
+  else if (statusRaw.includes("recont")) nextStatus = "À recontacter";
+  else if (statusRaw.includes("reten")) nextStatus = "Non retenu";
+
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const statusCol = headers.indexOf("Statut") + 1;
+  const validationDateCol = headers.indexOf("ValidationDate") + 1;
+  if (!statusCol || !validationDateCol) {
+    return { success: false, error: "Colonnes FabrikRH manquantes" };
+  }
+
+  sheet.getRange(row._row, statusCol).setValue(nextStatus);
+  sheet.getRange(row._row, validationDateCol).setValue(nowStr());
+  return { success: true, statut: nextStatus };
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -591,6 +680,10 @@ function emailContactUser(b) {
 // ── Fabrik RH ──
 
 function emailFabrikAdmin(b) {
+  const domaines = b.domainesExpertise || b.interet || "";
+  const sujets = b.sujetsInteret || b.interet || "";
+  const fonctionActuelle = b.fonctionActuelle || b.fonction || "";
+  const secteur = b.secteurActivite || b.entreprise || "";
   const content = `
     <p style="color:#555;font-size:15px;margin:0 0 20px;">Nouvelle demande Fabrik RH reçue.</p>
     <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
@@ -598,9 +691,19 @@ function emailFabrikAdmin(b) {
       ${fieldRow("Nom", b.nom)}
       ${fieldRow("Email", b.email)}
       ${fieldRow("Téléphone", b.telephone)}
-      ${fieldRow("Entreprise", b.entreprise)}
-      ${fieldRow("Fonction", b.fonction)}
-      ${fieldRow("Centre d'intérêt", b.interet)}
+      ${fieldRow("Ville", b.ville)}
+      ${fieldRow("Fonction actuelle", fonctionActuelle)}
+      ${fieldRow("Expérience RH", b.experienceRh)}
+      ${fieldRow("Secteur d'activité", secteur)}
+      ${fieldRow("Domaines d'expertise RH", domaines)}
+      ${fieldRow("Rôle souhaité", b.roleSouhaite)}
+      ${fieldRow("Motivation", b.motivation)}
+      ${fieldRow("Sujets d'intérêt", sujets)}
+      ${fieldRow("Contenu RH déjà produit", b.contenuRh)}
+      ${fieldRow("Lien de référence", b.lienReference)}
+      ${fieldRow("LinkedIn", b.linkedin)}
+      ${fieldRow("CV", b.cvUrl)}
+      ${fieldRow("Consentement RGPD", b.consentement)}
     </table>
     <div style="margin-top:24px;text-align:center;">
       <a href="mailto:${b.email}" style="background:#C8102E;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:600;font-size:14px;">Répondre</a>
@@ -609,14 +712,21 @@ function emailFabrikAdmin(b) {
 }
 
 function emailFabrikUser(b) {
+  const domaines = b.domainesExpertise || b.interet || "—";
+  const sujets = b.sujetsInteret || b.interet || "—";
+  const fonctionActuelle = b.fonctionActuelle || b.fonction || "—";
+  const secteur = b.secteurActivite || b.entreprise || "—";
   const content = `
     <p style="color:#555;font-size:15px;line-height:1.6;">Bonjour <strong>${b.prenom || ""} ${b.nom || ""}</strong>,</p>
-    <p style="color:#555;font-size:15px;line-height:1.6;">Merci pour votre intérêt pour la Fabrik RH. Notre équipe a bien reçu votre demande et vous contactera très prochainement.</p>
+    <p style="color:#555;font-size:15px;line-height:1.6;">Merci pour votre intérêt pour la Fabrik RH. Notre équipe a bien reçu votre candidature et la validera dans les plus brefs délais.</p>
     <div style="background:#f8f8f8;border:1px solid #eee;border-radius:8px;padding:20px;margin:20px 0;">
-      <p style="color:#C8102E;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin:0 0 12px;">Votre inscription</p>
-      <p style="color:#555;font-size:14px;margin:4px 0;"><strong>Entreprise :</strong> ${b.entreprise || "—"}</p>
-      <p style="color:#555;font-size:14px;margin:4px 0;"><strong>Fonction :</strong> ${b.fonction || "—"}</p>
-      <p style="color:#555;font-size:14px;margin:4px 0;"><strong>Centre d'intérêt :</strong> ${b.interet || "—"}</p>
+      <p style="color:#C8102E;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin:0 0 12px;">Récapitulatif de votre candidature</p>
+      <p style="color:#555;font-size:14px;margin:4px 0;"><strong>Ville :</strong> ${b.ville || "—"}</p>
+      <p style="color:#555;font-size:14px;margin:4px 0;"><strong>Fonction actuelle :</strong> ${fonctionActuelle}</p>
+      <p style="color:#555;font-size:14px;margin:4px 0;"><strong>Secteur :</strong> ${secteur}</p>
+      <p style="color:#555;font-size:14px;margin:4px 0;"><strong>Expérience RH :</strong> ${b.experienceRh || "—"}</p>
+      <p style="color:#555;font-size:14px;margin:4px 0;"><strong>Domaines RH :</strong> ${domaines}</p>
+      <p style="color:#555;font-size:14px;margin:4px 0;"><strong>Sujets d'intérêt :</strong> ${sujets}</p>
     </div>
     <p style="color:#555;font-size:15px;line-height:1.6;">À très bientôt,<br><strong>L'équipe DEO Conseil</strong></p>`;
   return emailWrapper("Votre demande Fabrik RH a bien été reçue", content);

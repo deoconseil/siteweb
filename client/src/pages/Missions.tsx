@@ -79,7 +79,7 @@ export default function Missions() {
           <div className="pi-grid pi-grid--3">
             {missions.map((mission) => (
               <div key={mission.id} className="pi-card pi-card--dark">
-                <div className="pi-card-num">{mission.id.toString().padStart(2, '0')}</div>
+                <div className="pi-card-num mission-number-emphasis">{mission.id.toString().padStart(2, '0')}</div>
                 <h3 className="pi-card-title">{mission.title}</h3>
                 <p className="pi-card-text">{mission.description}</p>
                 <div className="pi-card-accent"></div>
