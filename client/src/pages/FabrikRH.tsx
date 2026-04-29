@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import SiteFooter from "@/components/SiteFooter";
 import ActualitesSection from "@/components/ActualitesSection";
 import NewsletterSection from "@/components/NewsletterSection";
-import { gasPost } from "@/lib/gas";
+import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_RAW_UPLOAD_PRESET, gasPost } from "@/lib/gas";
 
 const BANNER_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/89599327/Kg3MR7aJ6wLfgVCatcFEoP/banner-fabrik_1ded06c1.jpg";
 const PHOTO_LEADERSHIP = "https://d2xsxph8kpxj0f.cloudfront.net/89599327/Kg3MR7aJ6wLfgVCatcFEoP/photo-leadership-women_02c59ba8.jpg";
@@ -187,21 +187,22 @@ export default function FabrikRH() {
     setErrorMessage("");
   };
 
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const result = typeof reader.result === "string" ? reader.result : "";
-        const base64 = result.includes(",") ? result.split(",")[1] : result;
-        if (!base64) {
-          reject(new Error("Impossible de lire le fichier CV."));
-          return;
-        }
-        resolve(base64);
-      };
-      reader.onerror = () => reject(new Error("Erreur de lecture du fichier CV."));
-      reader.readAsDataURL(file);
-    });
+  const uploadCvToCloudinary = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", CLOUDINARY_RAW_UPLOAD_PRESET);
+    formData.append("folder", "deo-conseil/fabrik-rh/cv");
+
+    const endpoint = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/raw/upload`;
+    const res = await fetch(endpoint, { method: "POST", body: formData });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.error?.message || "Upload Cloudinary CV impossible.");
+    }
+
+    const data = await res.json();
+    return data.secure_url || data.url || "";
   };
 
   const handleSubmit = async () => {
@@ -218,8 +219,12 @@ export default function FabrikRH() {
       const domaines = formState.domainesInteret.includes("Autres")
         ? [...formState.domainesInteret.filter((d) => d !== "Autres"), `Autres: ${formState.autresDomaine.trim()}`]
         : formState.domainesInteret;
-      const cvBase64 = cvFile ? await fileToBase64(cvFile) : "";
-      const uploadedCvUrl = formState.cvUrl.trim();
+      const typedCvUrl = formState.cvUrl.trim();
+      const uploadedCvUrl = cvFile ? await uploadCvToCloudinary(cvFile) : typedCvUrl;
+
+      if (!uploadedCvUrl) {
+        throw new Error("Le CV n'a pas pu être stocké sur Cloudinary.");
+      }
 
       const payload = {
         action: "submitFabrikRH",
@@ -240,8 +245,6 @@ export default function FabrikRH() {
         linkedin: formState.linkedin.trim(),
         cvUrl: uploadedCvUrl,
         cvFileName: cvFile?.name || "",
-        cvMimeType: cvFile?.type || "",
-        cvBase64,
         consentement: formState.consentement ? "Oui" : "Non",
         entreprise: formState.secteurActivite.trim(),
         fonction: formState.fonctionActuelle.trim(),
