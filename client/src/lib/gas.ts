@@ -6,6 +6,8 @@ export const GAS_URL = (import.meta.env.VITE_GAS_URL as string) || GAS_URL_DEFAU
 // Cloudinary config (public — unsigned upload preset) — hardcoded for self-hosting
 export const CLOUDINARY_CLOUD_NAME = (import.meta.env.VITE_CLOUDINARY_CLOUD_NAME as string) || "dywocv2it";
 export const CLOUDINARY_UPLOAD_PRESET = (import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET as string) || "deo_conseil_unsigned";
+export const CLOUDINARY_RAW_UPLOAD_PRESET =
+  (import.meta.env.VITE_CLOUDINARY_RAW_UPLOAD_PRESET as string) || CLOUDINARY_UPLOAD_PRESET;
 
 interface GasResponse<T = unknown> {
   ok: boolean;

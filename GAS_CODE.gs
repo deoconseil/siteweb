@@ -246,6 +246,21 @@ function submitFabrikRH(body) {
   const id = generateId();
   const domainesExpertise = body.domainesExpertise || body.interet || "";
   const sujetsInteret = body.sujetsInteret || body.interet || "";
+  const cvFileName = body.cvFileName || "";
+  const cvMimeType = body.cvMimeType || "";
+  const hasCvAttachment = !!(body.cvBase64 && cvFileName);
+  const cvUrlForSheet = body.cvUrl || (hasCvAttachment ? `Pièce jointe email: ${cvFileName}` : "");
+
+  let adminAttachments = [];
+  if (hasCvAttachment) {
+    try {
+      const bytes = Utilities.base64Decode(body.cvBase64);
+      adminAttachments = [Utilities.newBlob(bytes, cvMimeType || MimeType.PDF, cvFileName)];
+    } catch (e) {
+      Logger.log("CV attachment decode error: " + e.message);
+    }
+  }
+
   const rowData = {
     ID: id,
     Date: nowStr(),
@@ -264,7 +279,7 @@ function submitFabrikRH(body) {
     ContenuRH: body.contenuRh || "",
     LienReference: body.lienReference || "",
     LinkedIn: body.linkedin || "",
-    CVUrl: body.cvUrl || "",
+    CVUrl: cvUrlForSheet,
     Consentement: body.consentement || "",
     ValidationDate: "",
     Statut: "Nouveau"
@@ -272,7 +287,12 @@ function submitFabrikRH(body) {
   const row = FABRIK_RH_HEADERS.map((header) => rowData[header] || "");
   sheet.appendRow(row);
 
-  sendEmail(ADMIN_EMAIL, `🏭 Nouvelle demande Fabrik RH — ${body.prenom} ${body.nom}`, emailFabrikAdmin(body));
+  sendEmail(
+    ADMIN_EMAIL,
+    `🏭 Nouvelle demande Fabrik RH — ${body.prenom} ${body.nom}`,
+    emailFabrikAdmin(body),
+    adminAttachments
+  );
   if (body.email) {
     sendEmail(body.email, `Votre demande Fabrik RH — ${SITE_NAME}`, emailFabrikUser(body));
   }
@@ -562,13 +582,18 @@ function slugify(text) {
     .replace(/-+/g, "-");
 }
 
-function sendEmail(to, subject, htmlBody) {
+function sendEmail(to, subject, htmlBody, attachments) {
+  const options = {
+    htmlBody: htmlBody,
+    name: SITE_NAME,
+    replyTo: ADMIN_EMAIL
+  };
+  if (attachments && attachments.length) {
+    options.attachments = attachments;
+  }
+
   try {
-    GmailApp.sendEmail(to, subject, "", {
-      htmlBody: htmlBody,
-      name: SITE_NAME,
-      replyTo: ADMIN_EMAIL
-    });
+    GmailApp.sendEmail(to, subject, "", options);
   } catch (e) {
     Logger.log("Email error: " + e.message);
   }
@@ -684,6 +709,7 @@ function emailFabrikAdmin(b) {
   const sujets = b.sujetsInteret || b.interet || "";
   const fonctionActuelle = b.fonctionActuelle || b.fonction || "";
   const secteur = b.secteurActivite || b.entreprise || "";
+  const cvDisplay = b.cvUrl || (b.cvFileName ? `Pièce jointe: ${b.cvFileName}` : "");
   const content = `
     <p style="color:#555;font-size:15px;margin:0 0 20px;">Nouvelle demande Fabrik RH reçue.</p>
     <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
@@ -702,7 +728,7 @@ function emailFabrikAdmin(b) {
       ${fieldRow("Contenu RH déjà produit", b.contenuRh)}
       ${fieldRow("Lien de référence", b.lienReference)}
       ${fieldRow("LinkedIn", b.linkedin)}
-      ${fieldRow("CV", b.cvUrl)}
+      ${fieldRow("CV", cvDisplay)}
       ${fieldRow("Consentement RGPD", b.consentement)}
     </table>
     <div style="margin-top:24px;text-align:center;">

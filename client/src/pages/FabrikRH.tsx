@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import SiteFooter from "@/components/SiteFooter";
 import ActualitesSection from "@/components/ActualitesSection";
 import NewsletterSection from "@/components/NewsletterSection";
-import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET, gasPost } from "@/lib/gas";
+import { gasPost } from "@/lib/gas";
 
 const BANNER_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/89599327/Kg3MR7aJ6wLfgVCatcFEoP/banner-fabrik_1ded06c1.jpg";
 const PHOTO_LEADERSHIP = "https://d2xsxph8kpxj0f.cloudfront.net/89599327/Kg3MR7aJ6wLfgVCatcFEoP/photo-leadership-women_02c59ba8.jpg";
@@ -61,7 +61,7 @@ const ROLE_OPTIONS = [
   "Autre",
 ] as const;
 
-type FabrikStatus = "idle" | "uploading" | "sending" | "sent" | "error";
+type FabrikStatus = "idle" | "sending" | "sent" | "error";
 
 interface FabrikFormState {
   prenom: string;
@@ -187,24 +187,21 @@ export default function FabrikRH() {
     setErrorMessage("");
   };
 
-  const uploadCvFile = async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
-    formData.append("folder", "deo-conseil/fabrik-rh/cv");
-    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/raw/upload`, {
-      method: "POST",
-      body: formData,
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = typeof reader.result === "string" ? reader.result : "";
+        const base64 = result.includes(",") ? result.split(",")[1] : result;
+        if (!base64) {
+          reject(new Error("Impossible de lire le fichier CV."));
+          return;
+        }
+        resolve(base64);
+      };
+      reader.onerror = () => reject(new Error("Erreur de lecture du fichier CV."));
+      reader.readAsDataURL(file);
     });
-    if (!response.ok) {
-      throw new Error("Échec de l'upload du CV. Vous pouvez coller un lien Drive/Dropbox dans le champ lien CV.");
-    }
-    const data = await response.json() as { secure_url?: string; url?: string };
-    const uploadedUrl = data.secure_url || data.url || "";
-    if (!uploadedUrl) {
-      throw new Error("URL de CV non disponible après upload.");
-    }
-    return uploadedUrl;
   };
 
   const handleSubmit = async () => {
@@ -217,16 +214,12 @@ export default function FabrikRH() {
     setErrorMessage("");
 
     try {
-      let uploadedCvUrl = formState.cvUrl.trim();
-      if (cvFile) {
-        setStatus("uploading");
-        uploadedCvUrl = await uploadCvFile(cvFile);
-      }
-
       setStatus("sending");
       const domaines = formState.domainesInteret.includes("Autres")
         ? [...formState.domainesInteret.filter((d) => d !== "Autres"), `Autres: ${formState.autresDomaine.trim()}`]
         : formState.domainesInteret;
+      const cvBase64 = cvFile ? await fileToBase64(cvFile) : "";
+      const uploadedCvUrl = formState.cvUrl.trim();
 
       const payload = {
         action: "submitFabrikRH",
@@ -246,6 +239,9 @@ export default function FabrikRH() {
         lienReference: formState.lienReference.trim(),
         linkedin: formState.linkedin.trim(),
         cvUrl: uploadedCvUrl,
+        cvFileName: cvFile?.name || "",
+        cvMimeType: cvFile?.type || "",
+        cvBase64,
         consentement: formState.consentement ? "Oui" : "Non",
         entreprise: formState.secteurActivite.trim(),
         fonction: formState.fonctionActuelle.trim(),
@@ -640,9 +636,9 @@ export default function FabrikRH() {
                       type="button"
                       className="fabrik-popup-primary"
                       onClick={handleSubmit}
-                      disabled={status === "uploading" || status === "sending"}
+                      disabled={status === "sending"}
                     >
-                      {status === "uploading" ? "Upload du CV..." : status === "sending" ? "Envoi en cours..." : "Soumettre ma candidature"}
+                      {status === "sending" ? "Envoi en cours..." : "Soumettre ma candidature"}
                     </button>
                   )}
                 </div>
