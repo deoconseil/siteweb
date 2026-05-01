@@ -157,7 +157,7 @@ const toAttachmentName = (title: string): string => {
 const buildCloudinaryAttachmentUrl = (url: string, title: string): string => {
   if (!url.includes("res.cloudinary.com") || !url.includes("/upload/")) return url;
   if (url.includes("/fl_attachment")) return url;
-  const attachmentName = encodeURIComponent(toAttachmentName(title));
+  const attachmentName = encodeURIComponent(`${toAttachmentName(title)}.pdf`);
   return url.replace("/upload/", `/upload/fl_attachment:${attachmentName}/`);
 };
 
