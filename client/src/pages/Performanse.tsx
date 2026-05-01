@@ -2,6 +2,8 @@ import SiteFooter from "@/components/SiteFooter";
 import ActualitesSection from "@/components/ActualitesSection";
 import NewsletterSection from "@/components/NewsletterSection";
 
+const BANNER_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/89599327/Kg3MR7aJ6wLfgVCatcFEoP/photo-conference_f372139c.jpg";
+
 const BENEFICES = [
   {
     num: "01",
@@ -23,7 +25,7 @@ const BENEFICES = [
 const OUTILS = [
   { nom: "ECHO2", usage: "Comportement professionnel" },
   { nom: "MANAGE-R", usage: "Competences manageriales" },
-  { nom: "360° FEEDBACK", usage: "Evaluation multi-sources" },
+  { nom: "360 FEEDBACK", usage: "Evaluation multi-sources" },
   { nom: "TEAM BOOSTER", usage: "Dynamique d'equipe" },
   { nom: "BOOST", usage: "Competences commerciales" },
   { nom: "TWOB-R", usage: "Cognitif et comportemental" },
@@ -36,81 +38,102 @@ const OUTILS = [
 export default function Performanse() {
   return (
     <>
-      <div className="performanse-page">
-        <div className="page-hero performanse-hero">
+      <div className="page-performanse-v2">
+        <div className="page-hero page-hero--img" style={{ backgroundImage: `url(${BANNER_IMG})` }}>
           <div className="page-hero__overlay"></div>
           <div className="page-hero__content">
             <span className="page-hero__tag">OUTILS & METHODES</span>
-            <h1>PerformanSe</h1>
-            <p>Distributeur exclusif au Maroc via DEO Conseil.</p>
+            <h1>Performan<em>Se</em></h1>
+            <p>Distributeur exclusif au Maroc via DEO Conseil pour vos assessments RH.</p>
             <div className="page-hero__accent"></div>
           </div>
         </div>
 
-        <section className="performanse-intro">
-          <div className="performanse-inner">
-            <h2 className="performanse-title">Nos outils d'assessment</h2>
-            <p className="performanse-text">
+        <section className="pi-section pi-section--cream">
+          <div className="pi-inner">
+            <span className="pi-tag">ASSESSMENT RH</span>
+            <h2 className="pi-title">Nos outils d'<span className="pi-red">assessment</span></h2>
+            <p className="pi-text">
               Des outils reconnus internationalement pour un diagnostic precis des competences
               comportementales, du potentiel managerial et de la dynamique d'equipe.
             </p>
-            <p className="performanse-text">
+            <p className="pi-text">
               Fondes sur 35 ans d'expertise psychometrique, ces dispositifs sont valides scientifiquement
               et operationnels pour vos decisions RH.
             </p>
           </div>
         </section>
 
-        <section className="performanse-benefices">
-          <div className="performanse-inner performanse-benefices-grid">
-            {BENEFICES.map((item) => (
-              <article key={item.num} className="performanse-card">
-                <span className="performanse-card-num">{item.num}</span>
-                <h3>{item.title}</h3>
-                <p>{item.text}</p>
-              </article>
-            ))}
+        <div className="section-separator">
+          <div className="sep-line sep-line--red"></div>
+          <div className="sep-line sep-line--lime"></div>
+          <div className="sep-line sep-line--olive"></div>
+        </div>
+
+        <section className="pi-section pi-section--dark">
+          <div className="pi-inner">
+            <span className="pi-tag">POURQUOI PERFORMANSE</span>
+            <h2 className="pi-title pi-title--white">3 benefices <span className="pi-red">majeurs</span></h2>
+            <div className="pi-grid pi-grid--3">
+              {BENEFICES.map((item) => (
+                <article key={item.num} className="pi-card pi-card--dark">
+                  <div className="pi-card-num mission-number-emphasis">{item.num}</div>
+                  <h3 className="pi-card-title">{item.title}</h3>
+                  <p className="pi-card-text">{item.text}</p>
+                  <div className="pi-card-accent"></div>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
 
-        <section className="performanse-outils">
-          <div className="performanse-inner">
-            <h2 className="performanse-title">
-              10 outils disponibles
-            </h2>
-            <div className="performanse-outils-grid">
-              {OUTILS.map((outil, idx) => (
-                <div key={outil.nom} className={`performanse-outil ${idx % 4 === 0 ? "performanse-outil--accent" : ""}`}>
-                  <h4>{outil.nom}</h4>
-                  <p>{outil.usage}</p>
+        <section className="pi-section pi-section--cream">
+          <div className="pi-inner">
+            <span className="pi-tag">OUTILS DISPONIBLES</span>
+            <h2 className="pi-title">10 outils <span className="pi-red">operationnels</span></h2>
+            <div className="pi-grid pi-grid--2">
+              {OUTILS.map((outil) => (
+                <div key={outil.nom} className="pi-card pi-card--cream pi-card--border-left">
+                  <h3 className="pi-card-title">{outil.nom}</h3>
+                  <p className="pi-card-text">{outil.usage}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="performanse-kpis">
-          <div className="performanse-inner performanse-kpis-grid">
-            <div className="performanse-kpi">
-              <span>35+</span>
-              <p>Soft skills evaluees</p>
-            </div>
-            <div className="performanse-kpi">
-              <span>10</span>
-              <p>Outils disponibles</p>
-            </div>
-            <div className="performanse-kpi">
-              <span>#1</span>
-              <p>Distributeur exclusif Maroc</p>
+        <section className="pi-section pi-section--dark">
+          <div className="pi-inner">
+            <span className="pi-tag">CHIFFRES CLES</span>
+            <h2 className="pi-title pi-title--white">Impact <span className="pi-red">mesurable</span></h2>
+            <div className="pi-stats-row">
+              <div className="pi-stat">
+                <div className="pi-stat-num">35+</div>
+                <div className="pi-stat-label">Soft skills evaluees</div>
+              </div>
+              <div className="pi-stat">
+                <div className="pi-stat-num">10</div>
+                <div className="pi-stat-label">Outils disponibles</div>
+              </div>
+              <div className="pi-stat">
+                <div className="pi-stat-num">#1</div>
+                <div className="pi-stat-label">Distributeur exclusif Maroc</div>
+              </div>
+              <div className="pi-stat">
+                <div className="pi-stat-num">ISO</div>
+                <div className="pi-stat-label">Methodes certifiees</div>
+              </div>
             </div>
           </div>
         </section>
 
-        <section className="performanse-cta">
-          <div className="performanse-inner">
-            <h2>Besoin d'un assessment adapte a votre contexte ?</h2>
-            <p>Nous vous aidons a choisir l'outil pertinent selon vos objectifs RH.</p>
-            <a href="#contact" className="performanse-cta-btn">Parlons-en</a>
+        <section className="pi-section pi-section--red">
+          <div className="pi-inner pi-center">
+            <h2 className="pi-title pi-title--white">Besoin d'un assessment adapte a votre contexte ?</h2>
+            <p className="pi-text pi-text--white" style={{ textAlign: "center" }}>
+              Nous vous aidons a choisir l'outil le plus pertinent selon vos objectifs RH.
+            </p>
+            <a href="#contact" className="pi-btn pi-btn--white">Parlons-en</a>
           </div>
         </section>
       </div>
