@@ -81,7 +81,11 @@ export default function AdminFabrikPopup() {
     );
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      throw new Error(data?.error?.message || "Upload Cloudinary impossible.");
+      const apiMessage = String(data?.error?.message || "");
+      if (apiMessage.toLowerCase().includes("upload preset")) {
+        throw new Error("Preset Cloudinary raw introuvable. Configurez VITE_CLOUDINARY_RAW_UPLOAD_PRESET (ex: deo_conseil_unsigned_raw).");
+      }
+      throw new Error(apiMessage || "Upload Cloudinary impossible.");
     }
     const url = String(data?.secure_url || data?.url || "");
     if (!url) throw new Error("Cloudinary n'a retourne aucune URL.");
