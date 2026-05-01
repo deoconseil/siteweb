@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_UPLOAD_PRESET,
   CLOUDINARY_RAW_UPLOAD_PRESET,
   gasGet,
   gasPost,
@@ -62,34 +63,57 @@ export default function AdminFabrikPopup() {
   };
 
   const uploadArticle = async (file: File) => {
-    if (file.type !== "application/pdf") {
+    const lowerName = file.name.toLowerCase();
+    const isPdfByName = lowerName.endsWith(".pdf");
+    const isPdfByType = file.type === "application/pdf" || file.type === "application/x-pdf";
+    if (!isPdfByName && !isPdfByType) {
       throw new Error("Seuls les fichiers PDF sont autorises.");
     }
     if (file.size > 10 * 1024 * 1024) {
       throw new Error("Le fichier depasse 10 Mo.");
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", CLOUDINARY_RAW_UPLOAD_PRESET);
-    formData.append("folder", "deo-conseil/fabrik-rh/articles");
-    formData.append("filename_override", file.name.replace(/\.[^.]+$/, ""));
-
-    const res = await fetch(
-      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/raw/upload`,
-      { method: "POST", body: formData }
+    const presetCandidates = Array.from(
+      new Set([CLOUDINARY_RAW_UPLOAD_PRESET, CLOUDINARY_UPLOAD_PRESET].filter(Boolean))
     );
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      const apiMessage = String(data?.error?.message || "");
-      if (apiMessage.toLowerCase().includes("upload preset")) {
-        throw new Error("Preset Cloudinary raw introuvable. Configurez VITE_CLOUDINARY_RAW_UPLOAD_PRESET (ex: deo_conseil_unsigned_raw).");
+    const endpointCandidates = ["raw/upload", "auto/upload", "image/upload"];
+    const uploadErrors: string[] = [];
+
+    for (const preset of presetCandidates) {
+      for (const endpoint of endpointCandidates) {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("upload_preset", preset);
+        formData.append("folder", "deo-conseil/fabrik-rh/articles");
+        formData.append("filename_override", file.name.replace(/\.[^.]+$/, ""));
+
+        const res = await fetch(
+          `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${endpoint}`,
+          { method: "POST", body: formData }
+        );
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) {
+          const url = String(data?.secure_url || data?.url || "");
+          if (url) return url;
+        }
+
+        const apiMessage = String(data?.error?.message || `Cloudinary HTTP ${res.status}`);
+        uploadErrors.push(`[${preset} | ${endpoint}] ${apiMessage}`);
       }
-      throw new Error(apiMessage || "Upload Cloudinary impossible.");
     }
-    const url = String(data?.secure_url || data?.url || "");
-    if (!url) throw new Error("Cloudinary n'a retourne aucune URL.");
-    return url;
+
+    const fileFormatError = uploadErrors.find((msg) =>
+      msg.toLowerCase().includes("file format") || msg.toLowerCase().includes("not allowed")
+    );
+    if (fileFormatError) {
+      throw new Error("Ce preset Cloudinary refuse le format PDF. Merci de vérifier le preset côté Cloudinary.");
+    }
+
+    if (uploadErrors.length) {
+      throw new Error(`Upload Cloudinary impossible. ${uploadErrors[uploadErrors.length - 1]}`);
+    }
+
+    throw new Error("Upload Cloudinary impossible.");
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
