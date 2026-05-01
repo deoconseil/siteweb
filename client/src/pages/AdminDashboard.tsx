@@ -3,22 +3,32 @@ import { useAdminAuth } from "@/contexts/AdminAuthContext";
 import { useLocation } from "wouter";
 import AdminContacts from "@/components/admin/AdminContacts";
 import AdminFabrikRH from "@/components/admin/AdminFabrikRH";
+import AdminFabrikPopup from "@/components/admin/AdminFabrikPopup";
 import AdminCatalogue from "@/components/admin/AdminCatalogue";
 import AdminNewsletter from "@/components/admin/AdminNewsletter";
 import AdminBlog from "@/components/admin/AdminBlog";
 import AdminActualites from "@/components/admin/AdminActualites";
 import AdminReferences from "@/components/admin/AdminReferences";
 
-type Tab = "contacts" | "fabrik" | "catalogue" | "newsletter" | "blog" | "actualites" | "references";
+type Tab =
+  | "contacts"
+  | "fabrik"
+  | "fabrikPopup"
+  | "catalogue"
+  | "newsletter"
+  | "blog"
+  | "actualites"
+  | "references";
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: "contacts",    label: "Contacts",       icon: "📋" },
-  { id: "fabrik",      label: "Fabrik RH",      icon: "🏭" },
-  { id: "catalogue",   label: "Catalogue",      icon: "📚" },
-  { id: "newsletter",  label: "Newsletter",     icon: "📧" },
-  { id: "blog",        label: "Blog",           icon: "✍️" },
-  { id: "actualites",  label: "Actualités",     icon: "📰" },
-  { id: "references",  label: "Références",     icon: "🏢" },
+  { id: "contacts", label: "Contacts", icon: "\u{1F4CB}" },
+  { id: "fabrik", label: "Fabrik RH", icon: "\u{1F3ED}" },
+  { id: "fabrikPopup", label: "Popup Fabrik RH", icon: "\u{1F4C4}" },
+  { id: "catalogue", label: "Catalogue", icon: "\u{1F4DA}" },
+  { id: "newsletter", label: "Newsletter", icon: "\u{1F4E7}" },
+  { id: "blog", label: "Blog", icon: "\u270D\uFE0F" },
+  { id: "actualites", label: "Actualités", icon: "\u{1F4F0}" },
+  { id: "references", label: "Références", icon: "\u{1F3E2}" },
 ];
 
 export default function AdminDashboard() {
@@ -34,19 +44,29 @@ export default function AdminDashboard() {
 
   const renderContent = () => {
     switch (activeTab) {
-      case "contacts":    return <AdminContacts />;
-      case "fabrik":      return <AdminFabrikRH />;
-      case "catalogue":   return <AdminCatalogue />;
-      case "newsletter":  return <AdminNewsletter />;
-      case "blog":        return <AdminBlog />;
-      case "actualites":  return <AdminActualites />;
-      case "references":  return <AdminReferences />;
+      case "contacts":
+        return <AdminContacts />;
+      case "fabrik":
+        return <AdminFabrikRH />;
+      case "fabrikPopup":
+        return <AdminFabrikPopup />;
+      case "catalogue":
+        return <AdminCatalogue />;
+      case "newsletter":
+        return <AdminNewsletter />;
+      case "blog":
+        return <AdminBlog />;
+      case "actualites":
+        return <AdminActualites />;
+      case "references":
+        return <AdminReferences />;
+      default:
+        return <AdminContacts />;
     }
   };
 
   return (
     <div className="admin-layout">
-      {/* ── Sidebar ── */}
       <aside className={`admin-sidebar ${sidebarOpen ? "open" : "collapsed"}`}>
         <div className="admin-sidebar__header">
           <img
@@ -56,15 +76,15 @@ export default function AdminDashboard() {
           />
           <button
             className="admin-sidebar__toggle"
-            onClick={() => setSidebarOpen(o => !o)}
+            onClick={() => setSidebarOpen((o) => !o)}
             title={sidebarOpen ? "Réduire" : "Agrandir"}
           >
-            {sidebarOpen ? "◀" : "▶"}
+            {sidebarOpen ? "<" : ">"}
           </button>
         </div>
 
         <nav className="admin-sidebar__nav">
-          {TABS.map(tab => (
+          {TABS.map((tab) => (
             <button
               key={tab.id}
               className={`admin-nav-item ${activeTab === tab.id ? "active" : ""}`}
@@ -78,29 +98,24 @@ export default function AdminDashboard() {
 
         <div className="admin-sidebar__footer">
           <button className="admin-logout-btn" onClick={handleLogout}>
-            <span>🚪</span>
+            <span>{"\u{1F6AA}"}</span>
             {sidebarOpen && <span>Déconnexion</span>}
           </button>
         </div>
       </aside>
 
-      {/* ── Main ── */}
       <main className="admin-main">
         <header className="admin-topbar">
           <div className="admin-topbar__title">
-            <span className="admin-topbar__icon">
-              {TABS.find(t => t.id === activeTab)?.icon}
-            </span>
-            <h1>{TABS.find(t => t.id === activeTab)?.label}</h1>
+            <span className="admin-topbar__icon">{TABS.find((t) => t.id === activeTab)?.icon}</span>
+            <h1>{TABS.find((t) => t.id === activeTab)?.label}</h1>
           </div>
           <div className="admin-topbar__right">
             <span className="admin-topbar__user">deoconseilrh@gmail.com</span>
           </div>
         </header>
 
-        <div className="admin-content">
-          {renderContent()}
-        </div>
+        <div className="admin-content">{renderContent()}</div>
       </main>
     </div>
   );

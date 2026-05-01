@@ -1,8 +1,14 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import SiteFooter from "@/components/SiteFooter";
 import ActualitesSection from "@/components/ActualitesSection";
 import NewsletterSection from "@/components/NewsletterSection";
-import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_RAW_UPLOAD_PRESET, gasPost } from "@/lib/gas";
+import {
+  CLOUDINARY_CLOUD_NAME,
+  CLOUDINARY_RAW_UPLOAD_PRESET,
+  gasGet,
+  gasPost,
+} from "@/lib/gas";
+import FABRIK_LOGO from "@/assets/fabrik-rh-logo.png";
 
 const BANNER_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/89599327/Kg3MR7aJ6wLfgVCatcFEoP/banner-fabrik_1ded06c1.jpg";
 const PHOTO_LEADERSHIP = "https://d2xsxph8kpxj0f.cloudfront.net/89599327/Kg3MR7aJ6wLfgVCatcFEoP/photo-leadership-women_02c59ba8.jpg";
@@ -129,6 +135,13 @@ const initialFormState: FabrikFormState = {
   consentement: false,
 };
 
+interface FabrikDocPopupConfig {
+  title: string;
+  description: string;
+  article: string;
+  state: "ON" | "OFF";
+}
+
 export default function FabrikRH() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [step, setStep] = useState(1);
@@ -139,6 +152,8 @@ export default function FabrikRH() {
   const [cvUploadStatus, setCvUploadStatus] = useState<CvUploadStatus>("idle");
   const [cvUploadProgress, setCvUploadProgress] = useState(0);
   const [uploadedCvUrl, setUploadedCvUrl] = useState("");
+  const [docPopupConfig, setDocPopupConfig] = useState<FabrikDocPopupConfig | null>(null);
+  const [showDocPopup, setShowDocPopup] = useState(false);
   const cvUploadRequestId = useRef(0);
 
   const toggleItem = (index: number) => {
@@ -154,6 +169,41 @@ export default function FabrikRH() {
     if (step === 2) return "Étape 2/3 - Vos motivations";
     return "Étape 3/3 - CV & confirmation";
   }, [step]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchPopupConfig = async () => {
+      const res = await gasGet<{
+        title?: string;
+        description?: string;
+        article?: string;
+        state?: string;
+      }>({ action: "getFabrikPopupConfig" });
+
+      if (!isMounted || !res.ok || !res.data) return;
+
+      const normalized: FabrikDocPopupConfig = {
+        title: String(res.data.title || "").trim(),
+        description: String(res.data.description || "").trim(),
+        article: String(res.data.article || "").trim(),
+        state: String(res.data.state || "OFF").toUpperCase() === "ON" ? "ON" : "OFF",
+      };
+
+      setDocPopupConfig(normalized);
+      setShowDocPopup(
+        normalized.state === "ON" &&
+        normalized.title.length > 0 &&
+        normalized.description.length > 0 &&
+        normalized.article.length > 0
+      );
+    };
+
+    fetchPopupConfig();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const validateStep = (targetStep: number): string => {
     if (targetStep === 1) {
@@ -357,6 +407,38 @@ export default function FabrikRH() {
 
   return (
     <>
+      {showDocPopup && docPopupConfig && (
+        <div
+          className="fabrik-doc-popup-overlay"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) setShowDocPopup(false);
+          }}
+        >
+          <div className="fabrik-doc-popup" role="dialog" aria-modal="true" aria-label="Publication Fabrik RH">
+            <button
+              type="button"
+              className="fabrik-doc-popup-close"
+              onClick={() => setShowDocPopup(false)}
+              aria-label="Fermer"
+            >
+              ×
+            </button>
+            <img src={FABRIK_LOGO} alt="Logo La Fabrik RH" className="fabrik-doc-popup-logo" />
+            <h3>{docPopupConfig.title}</h3>
+            <p>{docPopupConfig.description}</p>
+            <a
+              href={docPopupConfig.article}
+              target="_blank"
+              rel="noreferrer"
+              download
+              className="fabrik-doc-popup-btn"
+            >
+              Télécharger l'article PDF
+            </a>
+          </div>
+        </div>
+      )}
+
       <div className="page-fabrik-v2">
         {/* ═══ HERO BANNER ═══ */}
         <div className="page-hero page-hero--img" style={{ backgroundImage: `url(${BANNER_IMG})` }}>

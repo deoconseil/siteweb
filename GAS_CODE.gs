@@ -20,6 +20,7 @@
  *  - Blog
  *  - Actualites
  *  - References
+ *  - FabrikPopup
  * ═══════════════════════════════════════════════════════════════════
  */
 
@@ -42,6 +43,10 @@ const FABRIK_RH_HEADERS = [
   "LinkedIn", "CVUrl", "Consentement", "ValidationDate", "Statut"
 ];
 
+const FABRIK_POPUP_HEADERS = [
+  "ID", "Date", "Title", "Description", "Article", "State"
+];
+
 // ══════════════════════════════════════════════════════════════════
 //  POINT D'ENTRÉE HTTP
 // ══════════════════════════════════════════════════════════════════
@@ -57,6 +62,7 @@ function doGet(e) {
       case "getReferences":  return jsonOk(getReferences());
       case "getContacts":    return jsonOk(getContacts());
       case "getFabrikRH":    return jsonOk(getFabrikRH());
+      case "getFabrikPopupConfig": return jsonOk(getFabrikPopupConfig());
       case "getCatalogue":   return jsonOk(getCatalogue());
       case "getNewsletter":  return jsonOk(getNewsletter());
       case "deleteBlog":     return jsonOk(deleteBlog(params.id));
@@ -93,6 +99,7 @@ function doPost(e) {
       case "saveBlog":        return jsonOk(saveBlog(body));
       case "saveActualite":   return jsonOk(saveActualite(body));
       case "saveReference":   return jsonOk(saveReference(body));
+      case "saveFabrikPopupConfig": return jsonOk(saveFabrikPopupConfig(body));
       case "updateFabrikStatus": return jsonOk(updateFabrikStatus(body.id, body.statut));
       default:                return jsonError("Action inconnue: " + action);
     }
@@ -125,6 +132,7 @@ function initSheet(sheet, name) {
     Blog:       ["ID","Date","Titre","Slug","Auteur","Categorie","Tags","Extrait","Contenu","Image","Publie"],
     Actualites: ["ID","Date","Titre","Slug","Categorie","Tags","Extrait","Contenu","Image","Publie"],
     References: ["ID","Date","Nom","Logo","Actif"],
+    FabrikPopup: FABRIK_POPUP_HEADERS,
   };
   if (headers[name]) {
     sheet.appendRow(headers[name]);
@@ -145,6 +153,7 @@ function ensureSheetHeaders(sheet, name) {
     Blog:       ["ID","Date","Titre","Slug","Auteur","Categorie","Tags","Extrait","Contenu","Image","Publie"],
     Actualites: ["ID","Date","Titre","Slug","Categorie","Tags","Extrait","Contenu","Image","Publie"],
     References: ["ID","Date","Nom","Logo","Actif"],
+    FabrikPopup: FABRIK_POPUP_HEADERS,
   };
   const expectedHeaders = headersBySheet[name];
   if (!expectedHeaders) return;
@@ -330,6 +339,56 @@ function updateFabrikStatus(id, statut) {
   sheet.getRange(row._row, statusCol).setValue(nextStatus);
   sheet.getRange(row._row, validationDateCol).setValue(nowStr());
   return { success: true, statut: nextStatus };
+}
+
+function getFabrikPopupConfig() {
+  const rows = sheetToObjects(getSheet("FabrikPopup"));
+  if (!rows.length) {
+    return {
+      id: "",
+      date: "",
+      title: "",
+      description: "",
+      article: "",
+      state: "OFF",
+    };
+  }
+
+  const row = rows[rows.length - 1];
+  return {
+    id: row.ID || "",
+    date: row.Date || "",
+    title: row.Title || "",
+    description: row.Description || "",
+    article: row.Article || "",
+    state: String(row.State || "OFF").toUpperCase() === "ON" ? "ON" : "OFF",
+  };
+}
+
+function saveFabrikPopupConfig(body) {
+  const sheet = getSheet("FabrikPopup");
+  const rows = sheetToObjects(sheet);
+  const existing = body.id ? rows.find((r) => r.ID === body.id) : null;
+
+  const id = existing ? existing.ID : generateId();
+  const state = String(body.state || "OFF").toUpperCase() === "ON" ? "ON" : "OFF";
+  const rowData = {
+    ID: id,
+    Date: nowStr(),
+    Title: body.title || "",
+    Description: body.description || "",
+    Article: body.article || "",
+    State: state,
+  };
+  const row = FABRIK_POPUP_HEADERS.map((header) => rowData[header] || "");
+
+  if (existing) {
+    sheet.getRange(existing._row, 1, 1, row.length).setValues([row]);
+  } else {
+    sheet.appendRow(row);
+  }
+
+  return { success: true, id: id, state: state };
 }
 
 // ══════════════════════════════════════════════════════════════════
