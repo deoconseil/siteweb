@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import SiteFooter from "@/components/SiteFooter";
 import ActualitesSection from "@/components/ActualitesSection";
 import NewsletterSection from "@/components/NewsletterSection";
@@ -61,7 +61,31 @@ const ROLE_OPTIONS = [
   "Autre",
 ] as const;
 
+const SECTEUR_OPTIONS = [
+  "Industrie & Manufacturing",
+  "Agroalimentaire",
+  "Énergie & Environnement",
+  "BTP & Construction",
+  "Chimie & Pharmacie",
+  "Conseil & Audit",
+  "Banque & Finance",
+  "Assurance",
+  "Immobilier",
+  "Transport & Logistique",
+  "Santé & Médico-social",
+  "Éducation & Formation",
+  "Ressources Humaines",
+  "Technologies & Informatique",
+  "Télécommunications",
+  "Commerce & Distribution",
+  "Tourisme & Hôtellerie",
+  "Administration publique",
+  "Agriculture",
+  "Autre",
+] as const;
+
 type FabrikStatus = "idle" | "sending" | "sent" | "error";
+type CvUploadStatus = "idle" | "uploading" | "uploaded" | "error";
 
 interface FabrikFormState {
   prenom: string;
@@ -112,6 +136,10 @@ export default function FabrikRH() {
   const [errorMessage, setErrorMessage] = useState("");
   const [formState, setFormState] = useState<FabrikFormState>(initialFormState);
   const [cvFile, setCvFile] = useState<File | null>(null);
+  const [cvUploadStatus, setCvUploadStatus] = useState<CvUploadStatus>("idle");
+  const [cvUploadProgress, setCvUploadProgress] = useState(0);
+  const [uploadedCvUrl, setUploadedCvUrl] = useState("");
+  const cvUploadRequestId = useRef(0);
 
   const toggleItem = (index: number) => {
     setOpenIndex((prev) => (prev === index ? null : index));
@@ -171,22 +199,93 @@ export default function FabrikRH() {
     setStep((prev) => Math.max(1, prev - 1));
   };
 
+  const uploadCvViaXhr = (endpoint: string, file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", endpoint);
+      xhr.responseType = "json";
+
+      xhr.upload.onprogress = (event) => {
+        if (!event.lengthComputable) return;
+        const pct = Math.round((event.loaded / event.total) * 100);
+        setCvUploadProgress(pct);
+      };
+
+      xhr.onerror = () => reject(new Error("Erreur reseau durant l'upload du CV."));
+      xhr.onload = () => {
+        const body = xhr.response || {};
+        if (xhr.status >= 200 && xhr.status < 300) {
+          const url = body.secure_url || body.url || "";
+          if (url) resolve(url);
+          else reject(new Error("Cloudinary a repondu sans URL de CV."));
+          return;
+        }
+        const apiMessage = body?.error?.message || `Cloudinary HTTP ${xhr.status}`;
+        reject(new Error(apiMessage));
+      };
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", CLOUDINARY_RAW_UPLOAD_PRESET);
+      formData.append("folder", "deo-conseil/fabrik-rh/cv");
+      formData.append("use_filename", "true");
+      formData.append("unique_filename", "true");
+      xhr.send(formData);
+    });
+  };
+
   const uploadCvToCloudinary = async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", CLOUDINARY_RAW_UPLOAD_PRESET);
-    formData.append("folder", "deo-conseil/fabrik-rh/cv");
+    const endpoints = [
+      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/raw/upload`,
+      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`,
+    ];
 
-    const endpoint = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/raw/upload`;
-    const res = await fetch(endpoint, { method: "POST", body: formData });
+    let lastError: Error | null = null;
+    for (const endpoint of endpoints) {
+      try {
+        return await uploadCvViaXhr(endpoint, file);
+      } catch (err) {
+        lastError = err instanceof Error ? err : new Error("Upload Cloudinary CV impossible.");
+      }
+    }
+    throw lastError || new Error("Upload Cloudinary CV impossible.");
+  };
 
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err?.error?.message || "Upload Cloudinary CV impossible.");
+  const handleCvFileChange = async (file: File | null, resetInput?: () => void) => {
+    const requestId = ++cvUploadRequestId.current;
+    setErrorMessage("");
+    setUploadedCvUrl("");
+    setCvUploadProgress(0);
+    setCvUploadStatus("idle");
+
+    if (!file) {
+      setCvFile(null);
+      return;
     }
 
-    const data = await res.json();
-    return data.secure_url || data.url || "";
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMessage("Le fichier CV depasse 5 Mo.");
+      if (resetInput) resetInput();
+      setCvFile(null);
+      return;
+    }
+
+    setCvFile(file);
+    setCvUploadStatus("uploading");
+    try {
+      const url = await uploadCvToCloudinary(file);
+      if (requestId !== cvUploadRequestId.current) return;
+      setUploadedCvUrl(url);
+      setCvUploadStatus("uploaded");
+      setCvUploadProgress(100);
+    } catch (err) {
+      if (requestId !== cvUploadRequestId.current) return;
+      setCvUploadStatus("error");
+      setCvUploadProgress(0);
+      setCvFile(null);
+      if (resetInput) resetInput();
+      setErrorMessage(err instanceof Error ? err.message : "Upload du CV impossible.");
+    }
   };
 
   const handleSubmit = async () => {
@@ -204,10 +303,12 @@ export default function FabrikRH() {
         ? [...formState.domainesInteret.filter((d) => d !== "Autres"), `Autres: ${formState.autresDomaine.trim()}`]
         : formState.domainesInteret;
       const typedCvUrl = formState.cvUrl.trim();
-      const uploadedCvUrl = cvFile ? await uploadCvToCloudinary(cvFile) : typedCvUrl;
-
-      if (!uploadedCvUrl) {
-        throw new Error("Le CV n'a pas pu être stocké sur Cloudinary.");
+      const finalCvUrl = (cvFile ? uploadedCvUrl : "") || typedCvUrl;
+      if (cvFile && cvUploadStatus === "uploading") {
+        throw new Error("Upload du CV en cours. Merci d'attendre.");
+      }
+      if (!finalCvUrl) {
+        throw new Error("Le CV n'a pas pu etre stocke sur Cloudinary.");
       }
 
       const payload = {
@@ -227,7 +328,7 @@ export default function FabrikRH() {
         contenuRh: formState.contenuRh,
         lienReference: formState.lienReference.trim(),
         linkedin: formState.linkedin.trim(),
-        cvUrl: uploadedCvUrl,
+        cvUrl: finalCvUrl,
         cvFileName: cvFile?.name || "",
         consentement: formState.consentement ? "Oui" : "Non",
         entreprise: formState.secteurActivite.trim(),
@@ -245,6 +346,9 @@ export default function FabrikRH() {
       setStep(3);
       setFormState(initialFormState);
       setCvFile(null);
+      setCvUploadStatus("idle");
+      setCvUploadProgress(0);
+      setUploadedCvUrl("");
     } catch (err) {
       setStatus("error");
       setErrorMessage(err instanceof Error ? err.message : "Une erreur est survenue lors de l'envoi.");
@@ -489,7 +593,12 @@ export default function FabrikRH() {
                     </label>
                     <label className="fabrik-popup-field fabrik-popup-field--full">
                       <span>Secteur d'activité *</span>
-                      <input value={formState.secteurActivite} onChange={(e) => updateField("secteurActivite", e.target.value)} placeholder="Ex : Finance, Industrie, Tech, Santé..." />
+                      <select value={formState.secteurActivite} onChange={(e) => updateField("secteurActivite", e.target.value)}>
+                        <option value="">Selectionner votre secteur</option>
+                        {SECTEUR_OPTIONS.map((item) => (
+                          <option key={item} value={item}>{item}</option>
+                        ))}
+                      </select>
                     </label>
                     <div className="fabrik-popup-field fabrik-popup-field--full">
                       <span>Domaines d'expertise / intérêt RH *</span>
@@ -570,20 +679,16 @@ export default function FabrikRH() {
                         accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                         onChange={(e) => {
                           const file = e.target.files?.[0] || null;
-                          if (!file) {
-                            setCvFile(null);
-                            return;
-                          }
-                          if (file.size > 5 * 1024 * 1024) {
-                            setErrorMessage("Le fichier CV dépasse 5 Mo.");
-                            e.target.value = "";
-                            return;
-                          }
-                          setErrorMessage("");
-                          setCvFile(file);
+                          handleCvFileChange(file, () => { e.target.value = ""; });
                         }}
                       />
                       {cvFile && <small className="fabrik-popup-file-name">{cvFile.name}</small>}
+                      {cvUploadStatus === "uploading" && (
+                        <small className="fabrik-popup-file-name">Upload en cours... {cvUploadProgress}%</small>
+                      )}
+                      {cvUploadStatus === "uploaded" && (
+                        <small className="fabrik-popup-file-name">CV uploade avec succes sur Cloudinary.</small>
+                      )}
                     </label>
                     <label className="fabrik-popup-field fabrik-popup-field--full">
                       <span>ou lien CV (Drive/Dropbox)</span>
@@ -617,7 +722,7 @@ export default function FabrikRH() {
                       type="button"
                       className="fabrik-popup-primary"
                       onClick={handleSubmit}
-                      disabled={status === "sending"}
+                      disabled={status === "sending" || cvUploadStatus === "uploading"}
                     >
                       {status === "sending" ? "Envoi en cours..." : "Soumettre ma candidature"}
                     </button>
@@ -634,5 +739,4 @@ export default function FabrikRH() {
     </>
   );
 }
-
 

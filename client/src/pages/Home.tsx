@@ -448,6 +448,7 @@ export default function Home() {
           </ul>
           <div className="nav-right">
             <button className="nav-cta-outline" onClick={(e) => { e.preventDefault(); openModal(); }}>↓ Catalogue</button>
+            <a href="/performanse" className="nav-cta">Performanse</a>
             <a href="#contact" className="nav-cta">Parlons-en</a>
           </div>
           <button className="mobile-toggle" onClick={() => setMobileOpen(!mobileOpen)}>
@@ -459,6 +460,7 @@ export default function Home() {
             <a href="/notre-adn" onClick={() => setMobileOpen(false)}>Notre ADN</a>
             <a href="/expertises" onClick={() => setMobileOpen(false)}>Expertises</a>
             <a href="/programmes-sur-mesure" onClick={() => setMobileOpen(false)}>Programmes</a>
+            <a href="/performanse" onClick={() => setMobileOpen(false)}>Performanse</a>
             <a href="/fabrik-rh" onClick={() => setMobileOpen(false)}>La Fabrik RH</a>
             <a href="/blog" onClick={() => setMobileOpen(false)}>Blog DEO</a>
             <a href="#contact" onClick={() => setMobileOpen(false)}>Contact</a>
@@ -1053,3 +1055,5 @@ export default function Home() {
     </>
   );
 }
+
+

@@ -80,6 +80,7 @@ export default function Layout({ children }: LayoutProps) {
           </ul>
           <div className="nav-right">
             <button className="nav-cta-outline" onClick={(e) => { e.preventDefault(); setShowModal(true); setModalSubmitted(false); }}>↓ Catalogue</button>
+            <a href="/performanse" className={`nav-cta ${location === '/performanse' ? 'nav-active' : ''}`}>Performanse</a>
             <a href="#contact" className="nav-cta">Parlons-en</a>
           </div>
           <button className="mobile-toggle" onClick={() => setMobileOpen(!mobileOpen)}>
@@ -91,10 +92,12 @@ export default function Layout({ children }: LayoutProps) {
             <a href="/notre-adn" className={location === '/notre-adn' ? 'nav-active' : ''} onClick={() => setMobileOpen(false)}>Notre ADN</a>
             <a href="/expertises" className={location.startsWith('/expertises') ? 'nav-active' : ''} onClick={() => setMobileOpen(false)}>Expertises</a>
             <a href="/programmes-sur-mesure" className={location === '/programmes-sur-mesure' ? 'nav-active' : ''} onClick={() => setMobileOpen(false)}>Programmes</a>
+            <a href="/performanse" className={location === '/performanse' ? 'nav-active' : ''} onClick={() => setMobileOpen(false)}>Performanse</a>
             <a href="/fabrik-rh" className={location === '/fabrik-rh' ? 'nav-active' : ''} onClick={() => setMobileOpen(false)}>La Fabrik RH</a>
             <a href="/blog" className={location === '/blog' ? 'nav-active' : ''} onClick={() => setMobileOpen(false)}>Blog DEO</a>
             <a href="#contact" onClick={() => setMobileOpen(false)}>Contact</a>
             <button className="nav-cta-outline" style={{width:'100%',textAlign:'center',marginTop:'8px'}} onClick={() => { setMobileOpen(false); setShowModal(true); setModalSubmitted(false); }}>↓ Catalogue</button>
+            <a href="/performanse" className={`nav-cta ${location === '/performanse' ? 'nav-active' : ''}`}>Performanse</a>
           </div>
         )}
       </nav>
@@ -167,3 +170,5 @@ export default function Layout({ children }: LayoutProps) {
     </>
   );
 }
+
+

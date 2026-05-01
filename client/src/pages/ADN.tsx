@@ -206,6 +206,11 @@ export default function ADN() {
               </div>
             ))}
           </div>
+          <div className="adn-assessment__cta">
+            <a href="/performanse" className="adn-assessment__cta-btn">
+              Decouvrir Performanse - Nos outils d'assessment
+            </a>
+          </div>
         </div>
       </section>
 

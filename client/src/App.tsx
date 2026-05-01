@@ -15,6 +15,7 @@ import FabrikRH from "./pages/FabrikRH";
 import Blog from "./pages/Blog";
 import ExpertiseDetail from "./pages/ExpertiseDetail";
 import Programmes from "./pages/Programmes";
+import Performanse from "./pages/Performanse";
 import BlogDetail from "./pages/BlogDetail";
 import ActualiteDetail from "./pages/ActualiteDetail";
 import Actualites from "./pages/Actualites";
@@ -38,6 +39,7 @@ function Router() {
       <Route path={"/expertises"}>{() => <LayoutPage component={Expertises} />}</Route>
       <Route path={"/expertises/:slug"}>{() => <LayoutPage component={ExpertiseDetail} />}</Route>
       <Route path={"/programmes-sur-mesure"}>{() => <LayoutPage component={Programmes} />}</Route>
+      <Route path={"/performanse"}>{() => <LayoutPage component={Performanse} />}</Route>
       <Route path={"/fabrik-rh"}>{() => <LayoutPage component={FabrikRH} />}</Route>
       <Route path={"/blog"}>{() => <LayoutPage component={Blog} />}</Route>
       <Route path={"/blog/:slug"}>{() => <Layout><BlogDetail /></Layout>}</Route>
