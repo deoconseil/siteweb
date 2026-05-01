@@ -142,6 +142,25 @@ interface FabrikDocPopupConfig {
   state: "ON" | "OFF";
 }
 
+const toAttachmentName = (title: string): string => {
+  const normalized = title
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9\s-_]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .toLowerCase();
+  return normalized || "fabrik-rh-document";
+};
+
+const buildCloudinaryAttachmentUrl = (url: string, title: string): string => {
+  if (!url.includes("res.cloudinary.com") || !url.includes("/upload/")) return url;
+  if (url.includes("/fl_attachment")) return url;
+  const attachmentName = encodeURIComponent(toAttachmentName(title));
+  return url.replace("/upload/", `/upload/fl_attachment:${attachmentName}/`);
+};
+
 export default function FabrikRH() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [step, setStep] = useState(1);
@@ -427,7 +446,7 @@ export default function FabrikRH() {
             <h3>{docPopupConfig.title}</h3>
             <p>{docPopupConfig.description}</p>
             <a
-              href={docPopupConfig.article}
+              href={buildCloudinaryAttachmentUrl(docPopupConfig.article, docPopupConfig.title)}
               target="_blank"
               rel="noreferrer"
               download
