@@ -73,9 +73,7 @@ export default function AdminFabrikPopup() {
     formData.append("file", file);
     formData.append("upload_preset", CLOUDINARY_RAW_UPLOAD_PRESET);
     formData.append("folder", "deo-conseil/fabrik-rh/articles");
-    formData.append("resource_type", "raw");
-    formData.append("use_filename", "true");
-    formData.append("unique_filename", "true");
+    formData.append("filename_override", file.name.replace(/\.[^.]+$/, ""));
 
     const res = await fetch(
       `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/raw/upload`,
@@ -223,15 +221,18 @@ export default function AdminFabrikPopup() {
                     onChange={handleFileChange}
                   />
                 </div>
+                <small className="admin-muted-small">
+                  Le PDF est uploadé automatiquement sur Cloudinary en URL publique.
+                </small>
               </div>
 
               <div className="admin-field admin-field--full">
-                <label>URL publique PDF *</label>
+                <label>URL publique PDF (auto)</label>
                 <input
-                  type="url"
+                  type="text"
                   value={form.article}
-                  onChange={(e) => setForm((prev) => ({ ...prev, article: e.target.value }))}
-                  placeholder="https://res.cloudinary.com/.../article.pdf"
+                  readOnly
+                  placeholder="L'URL sera générée automatiquement après upload."
                 />
               </div>
 
