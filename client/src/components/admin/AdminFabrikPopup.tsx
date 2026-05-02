@@ -17,6 +17,15 @@ interface FabrikPopupConfig {
   state: PopupState;
 }
 
+interface CloudinaryUploadResponse {
+  secure_url?: string;
+  url?: string;
+  type?: string;
+  error?: {
+    message?: string;
+  };
+}
+
 const EMPTY_CONFIG: FabrikPopupConfig = {
   title: "",
   description: "",
@@ -82,35 +91,52 @@ export default function AdminFabrikPopup() {
       throw new Error("Le fichier depasse 10 Mo.");
     }
 
-    const presetCandidates = Array.from(
-      new Set([CLOUDINARY_RAW_UPLOAD_PRESET, CLOUDINARY_UPLOAD_PRESET].filter(Boolean))
-    );
-    const endpointCandidates = ["raw/upload", "auto/upload", "image/upload"];
-    const uploadErrors: string[] = [];
+    const articleFolder = "deo-conseil/fabrik-rh/articles";
     const baseName = normalizePublicIdPart(file.name.replace(/\.[^.]+$/, "")) || "fabrik-rh-article";
-    const publicId = `deo-conseil/fabrik-rh/articles/${baseName}-${Date.now()}.pdf`;
+    const publicId = `${baseName}-${Date.now()}.pdf`;
+    const uploadPlan = [
+      { preset: CLOUDINARY_UPLOAD_PRESET, endpoint: "auto/upload" },
+      { preset: CLOUDINARY_UPLOAD_PRESET, endpoint: "image/upload" },
+      { preset: CLOUDINARY_RAW_UPLOAD_PRESET, endpoint: "raw/upload" },
+      { preset: CLOUDINARY_RAW_UPLOAD_PRESET, endpoint: "auto/upload" },
+      { preset: CLOUDINARY_RAW_UPLOAD_PRESET, endpoint: "image/upload" },
+    ]
+      .filter((candidate) => Boolean(candidate.preset))
+      .filter(
+        (candidate, index, arr) =>
+          arr.findIndex((entry) => entry.preset === candidate.preset && entry.endpoint === candidate.endpoint) === index
+      );
+    const uploadErrors: string[] = [];
 
-    for (const preset of presetCandidates) {
-      for (const endpoint of endpointCandidates) {
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("upload_preset", preset);
-        formData.append("folder", "deo-conseil/fabrik-rh/articles");
-        formData.append("public_id", publicId);
+    for (const { preset, endpoint } of uploadPlan) {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", preset);
+      formData.append("folder", articleFolder);
+      formData.append("public_id", publicId);
+      formData.append("filename_override", `${baseName}.pdf`);
 
-        const res = await fetch(
-          `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${endpoint}`,
-          { method: "POST", body: formData }
-        );
-        const data = await res.json().catch(() => ({}));
-        if (res.ok) {
-          const url = String(data?.secure_url || data?.url || "");
-          if (url) return url;
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${endpoint}`,
+        { method: "POST", body: formData }
+      );
+      const data = (await res.json().catch(() => ({}))) as CloudinaryUploadResponse;
+      if (res.ok) {
+        const deliveryType = String(data.type || "upload").toLowerCase();
+        const url = String(data.secure_url || data.url || "").trim();
+        if (!url) {
+          uploadErrors.push(`[${preset} | ${endpoint}] Cloudinary a repondu sans URL publique.`);
+          continue;
         }
-
-        const apiMessage = String(data?.error?.message || `Cloudinary HTTP ${res.status}`);
-        uploadErrors.push(`[${preset} | ${endpoint}] ${apiMessage}`);
+        if (deliveryType !== "upload") {
+          uploadErrors.push(`[${preset} | ${endpoint}] Fichier upload mais non public (type='${deliveryType}').`);
+          continue;
+        }
+        return url;
       }
+
+      const apiMessage = String(data.error?.message || `Cloudinary HTTP ${res.status}`);
+      uploadErrors.push(`[${preset} | ${endpoint}] ${apiMessage}`);
     }
 
     const fileFormatError = uploadErrors.find((msg) =>
@@ -118,6 +144,13 @@ export default function AdminFabrikPopup() {
     );
     if (fileFormatError) {
       throw new Error("Ce preset Cloudinary refuse le format PDF. Merci de vérifier le preset côté Cloudinary.");
+    }
+
+    const privateTypeError = uploadErrors.find((msg) => msg.includes("non public (type='"));
+    if (privateTypeError) {
+      throw new Error(
+        "Le preset Cloudinary actuel stocke le PDF en mode prive/authentifie. Passez le preset en type 'upload' public."
+      );
     }
 
     if (uploadErrors.length) {

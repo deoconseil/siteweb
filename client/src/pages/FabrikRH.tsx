@@ -154,21 +154,6 @@ const toAttachmentName = (title: string): string => {
   return normalized || "fabrik-rh-document";
 };
 
-const buildCloudinaryAttachmentUrl = (url: string, title: string): string => {
-  if (!url.includes("res.cloudinary.com") || !url.includes("/upload/")) return url;
-  const withoutQuery = url.split("?")[0];
-  const lastSegment = withoutQuery.split("/").pop() || "";
-  const hasExtension = /\.[a-zA-Z0-9]{2,6}$/.test(lastSegment);
-  const isRawUrl = url.includes("/raw/upload/");
-  if (isRawUrl && !hasExtension) {
-    // Legacy raw assets saved without extension can throw 400 when transformed.
-    return url;
-  }
-  if (url.includes("/fl_attachment")) return url;
-  const attachmentName = encodeURIComponent(`${toAttachmentName(title)}.pdf`);
-  return url.replace("/upload/", `/upload/fl_attachment:${attachmentName}/`);
-};
-
 export default function FabrikRH() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [step, setStep] = useState(1);
@@ -186,9 +171,10 @@ export default function FabrikRH() {
 
   const downloadPopupArticle = async (url: string, title: string) => {
     const filename = `${toAttachmentName(title)}.pdf`;
+    const sourceUrl = url.trim();
     setIsDownloadingDoc(true);
     try {
-      const res = await fetch(url, { method: "GET" });
+      const res = await fetch(sourceUrl, { method: "GET" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const blob = await res.blob();
       const blobUrl = window.URL.createObjectURL(blob);
@@ -200,8 +186,8 @@ export default function FabrikRH() {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
     } catch {
-      // Fallback: open direct link if browser blocks blob download
-      window.open(buildCloudinaryAttachmentUrl(url, title), "_blank", "noopener,noreferrer");
+      // Fallback: open the original URL without adding Cloudinary transformations.
+      window.open(sourceUrl, "_blank", "noopener,noreferrer");
     } finally {
       setIsDownloadingDoc(false);
     }
