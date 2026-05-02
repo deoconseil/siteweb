@@ -181,7 +181,31 @@ export default function FabrikRH() {
   const [uploadedCvUrl, setUploadedCvUrl] = useState("");
   const [docPopupConfig, setDocPopupConfig] = useState<FabrikDocPopupConfig | null>(null);
   const [showDocPopup, setShowDocPopup] = useState(false);
+  const [isDownloadingDoc, setIsDownloadingDoc] = useState(false);
   const cvUploadRequestId = useRef(0);
+
+  const downloadPopupArticle = async (url: string, title: string) => {
+    const filename = `${toAttachmentName(title)}.pdf`;
+    setIsDownloadingDoc(true);
+    try {
+      const res = await fetch(url, { method: "GET" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch {
+      // Fallback: open direct link if browser blocks blob download
+      window.open(buildCloudinaryAttachmentUrl(url, title), "_blank", "noopener,noreferrer");
+    } finally {
+      setIsDownloadingDoc(false);
+    }
+  };
 
   const toggleItem = (index: number) => {
     setOpenIndex((prev) => (prev === index ? null : index));
@@ -453,15 +477,14 @@ export default function FabrikRH() {
             <img src={FABRIK_LOGO} alt="Logo La Fabrik RH" className="fabrik-doc-popup-logo" />
             <h3>{docPopupConfig.title}</h3>
             <p>{docPopupConfig.description}</p>
-            <a
-              href={buildCloudinaryAttachmentUrl(docPopupConfig.article, docPopupConfig.title)}
-              target="_blank"
-              rel="noreferrer"
-              download
+            <button
+              type="button"
               className="fabrik-doc-popup-btn"
+              onClick={() => downloadPopupArticle(docPopupConfig.article, docPopupConfig.title)}
+              disabled={isDownloadingDoc}
             >
-              Télécharger l'article PDF
-            </a>
+              {isDownloadingDoc ? "Téléchargement..." : "Télécharger l'article PDF"}
+            </button>
           </div>
         </div>
       )}

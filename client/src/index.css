@@ -11546,6 +11546,8 @@ img, video, iframe { max-width: 100%; }
   border-radius: 8px;
   background: var(--red);
   color: #fff;
+  border: none;
+  cursor: pointer;
   text-decoration: none;
   text-transform: uppercase;
   font-weight: 700;
@@ -11555,6 +11557,11 @@ img, video, iframe { max-width: 100%; }
 
 .fabrik-doc-popup-btn:hover {
   opacity: 0.9;
+}
+
+.fabrik-doc-popup-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .admin-select {
