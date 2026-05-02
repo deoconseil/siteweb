@@ -79,8 +79,8 @@ export default function Layout({ children }: LayoutProps) {
             <li><a href="/blog" className={location === '/blog' ? 'nav-active' : ''}>Blog DEO</a></li>
           </ul>
           <div className="nav-right">
-            <button className="nav-cta-outline" onClick={(e) => { e.preventDefault(); setShowModal(true); setModalSubmitted(false); }}>↓ Catalogue</button>
             <a href="/performanse" className={`nav-cta ${location === '/performanse' ? 'nav-active' : ''}`}>Performanse</a>
+            <button className="nav-cta-outline" onClick={(e) => { e.preventDefault(); setShowModal(true); setModalSubmitted(false); }}>↓ Catalogue</button>
             <a href="#contact" className="nav-cta">Parlons-en</a>
           </div>
           <button className="mobile-toggle" onClick={() => setMobileOpen(!mobileOpen)}>
