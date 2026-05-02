@@ -24,6 +24,15 @@ const EMPTY_CONFIG: FabrikPopupConfig = {
   state: "OFF",
 };
 
+const normalizePublicIdPart = (name: string): string =>
+  name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9_-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .toLowerCase();
+
 export default function AdminFabrikPopup() {
   const [form, setForm] = useState<FabrikPopupConfig>(EMPTY_CONFIG);
   const [loading, setLoading] = useState(true);
@@ -78,6 +87,8 @@ export default function AdminFabrikPopup() {
     );
     const endpointCandidates = ["raw/upload", "auto/upload", "image/upload"];
     const uploadErrors: string[] = [];
+    const baseName = normalizePublicIdPart(file.name.replace(/\.[^.]+$/, "")) || "fabrik-rh-article";
+    const publicId = `deo-conseil/fabrik-rh/articles/${baseName}-${Date.now()}.pdf`;
 
     for (const preset of presetCandidates) {
       for (const endpoint of endpointCandidates) {
@@ -85,7 +96,7 @@ export default function AdminFabrikPopup() {
         formData.append("file", file);
         formData.append("upload_preset", preset);
         formData.append("folder", "deo-conseil/fabrik-rh/articles");
-        formData.append("filename_override", file.name.replace(/\.[^.]+$/, ""));
+        formData.append("public_id", publicId);
 
         const res = await fetch(
           `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/${endpoint}`,

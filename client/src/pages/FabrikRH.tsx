@@ -156,6 +156,14 @@ const toAttachmentName = (title: string): string => {
 
 const buildCloudinaryAttachmentUrl = (url: string, title: string): string => {
   if (!url.includes("res.cloudinary.com") || !url.includes("/upload/")) return url;
+  const withoutQuery = url.split("?")[0];
+  const lastSegment = withoutQuery.split("/").pop() || "";
+  const hasExtension = /\.[a-zA-Z0-9]{2,6}$/.test(lastSegment);
+  const isRawUrl = url.includes("/raw/upload/");
+  if (isRawUrl && !hasExtension) {
+    // Legacy raw assets saved without extension can throw 400 when transformed.
+    return url;
+  }
   if (url.includes("/fl_attachment")) return url;
   const attachmentName = encodeURIComponent(`${toAttachmentName(title)}.pdf`);
   return url.replace("/upload/", `/upload/fl_attachment:${attachmentName}/`);
