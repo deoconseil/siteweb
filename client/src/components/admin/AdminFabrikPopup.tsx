@@ -47,6 +47,20 @@ const normalizePublicIdPart = (name: string): string =>
 const isCloudinaryRawPdfUrl = (url: string): boolean =>
   url.includes("res.cloudinary.com") && url.includes("/raw/upload/") && url.toLowerCase().includes(".pdf");
 
+const verifyCloudinaryPdfDelivery = async (url: string): Promise<void> => {
+  const res = await fetch(url, { method: "GET" });
+  if (res.ok) return;
+
+  const cldError = String(res.headers.get("x-cld-error") || "").toLowerCase();
+  if (res.status === 401 || cldError.includes("deny") || cldError.includes("acl")) {
+    throw new Error(
+      "Cloudinary bloque la livraison publique des PDF (ACL/Deny). Activez 'Allow delivery of PDF and ZIP files' dans Security, puis re-uploadez."
+    );
+  }
+
+  throw new Error(`URL PDF non accessible (HTTP ${res.status}).`);
+};
+
 export default function AdminFabrikPopup() {
   const [form, setForm] = useState<FabrikPopupConfig>(EMPTY_CONFIG);
   const [loading, setLoading] = useState(true);
@@ -150,6 +164,7 @@ export default function AdminFabrikPopup() {
           uploadErrors.push(`[${preset} | ${endpoint}] URL retournee non conforme (raw/pdf).`);
           continue;
         }
+        await verifyCloudinaryPdfDelivery(url);
         return url;
       }
 

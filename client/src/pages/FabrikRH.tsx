@@ -187,7 +187,13 @@ export default function FabrikRH() {
     setIsDownloadingDoc(true);
     try {
       const res = await fetch(sourceUrl, { method: "GET" });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        const cldError = String(res.headers.get("x-cld-error") || "").toLowerCase();
+        if (res.status === 401 || cldError.includes("deny") || cldError.includes("acl")) {
+          throw new Error("CLOUDINARY_PDF_BLOCKED");
+        }
+        throw new Error(`HTTP ${res.status}`);
+      }
       const blob = await res.blob();
       if (!(await hasPdfSignature(blob))) {
         throw new Error("INVALID_PDF_BINARY");
@@ -201,7 +207,11 @@ export default function FabrikRH() {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
     } catch (err) {
-      if (err instanceof Error && err.message === "INVALID_PDF_BINARY") {
+      if (err instanceof Error && err.message === "CLOUDINARY_PDF_BLOCKED") {
+        setDocDownloadError(
+          "Cloudinary bloque la livraison PDF (401 ACL). Activez 'Allow delivery of PDF and ZIP files' puis re-uploadez le PDF."
+        );
+      } else if (err instanceof Error && err.message === "INVALID_PDF_BINARY") {
         setDocDownloadError(
           "Le fichier configuré n'est pas un PDF valide. Merci de re-uploader l'article depuis l'admin."
         );
