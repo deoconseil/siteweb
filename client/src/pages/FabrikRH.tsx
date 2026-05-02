@@ -154,6 +154,12 @@ const toAttachmentName = (title: string): string => {
   return normalized || "fabrik-rh-document";
 };
 
+const hasPdfSignature = async (blob: Blob): Promise<boolean> => {
+  const bytes = new Uint8Array(await blob.slice(0, 5).arrayBuffer());
+  if (bytes.length < 5) return false;
+  return bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46 && bytes[4] === 0x2d;
+};
+
 export default function FabrikRH() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [step, setStep] = useState(1);
@@ -167,16 +173,25 @@ export default function FabrikRH() {
   const [docPopupConfig, setDocPopupConfig] = useState<FabrikDocPopupConfig | null>(null);
   const [showDocPopup, setShowDocPopup] = useState(false);
   const [isDownloadingDoc, setIsDownloadingDoc] = useState(false);
+  const [docDownloadError, setDocDownloadError] = useState("");
   const cvUploadRequestId = useRef(0);
 
   const downloadPopupArticle = async (url: string, title: string) => {
     const filename = `${toAttachmentName(title)}.pdf`;
     const sourceUrl = url.trim();
+    if (!sourceUrl) {
+      setDocDownloadError("Lien de l'article manquant.");
+      return;
+    }
+    setDocDownloadError("");
     setIsDownloadingDoc(true);
     try {
       const res = await fetch(sourceUrl, { method: "GET" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const blob = await res.blob();
+      if (!(await hasPdfSignature(blob))) {
+        throw new Error("INVALID_PDF_BINARY");
+      }
       const blobUrl = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = blobUrl;
@@ -185,9 +200,15 @@ export default function FabrikRH() {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
-    } catch {
-      // Fallback: open the original URL without adding Cloudinary transformations.
-      window.open(sourceUrl, "_blank", "noopener,noreferrer");
+    } catch (err) {
+      if (err instanceof Error && err.message === "INVALID_PDF_BINARY") {
+        setDocDownloadError(
+          "Le fichier configuré n'est pas un PDF valide. Merci de re-uploader l'article depuis l'admin."
+        );
+      } else {
+        setDocDownloadError("Téléchargement impossible. Le lien direct va s'ouvrir dans un nouvel onglet.");
+        window.open(sourceUrl, "_blank", "noopener,noreferrer");
+      }
     } finally {
       setIsDownloadingDoc(false);
     }
@@ -448,14 +469,20 @@ export default function FabrikRH() {
         <div
           className="fabrik-doc-popup-overlay"
           onClick={(event) => {
-            if (event.target === event.currentTarget) setShowDocPopup(false);
+            if (event.target === event.currentTarget) {
+              setShowDocPopup(false);
+              setDocDownloadError("");
+            }
           }}
         >
           <div className="fabrik-doc-popup" role="dialog" aria-modal="true" aria-label="Publication Fabrik RH">
             <button
               type="button"
               className="fabrik-doc-popup-close"
-              onClick={() => setShowDocPopup(false)}
+              onClick={() => {
+                setShowDocPopup(false);
+                setDocDownloadError("");
+              }}
               aria-label="Fermer"
             >
               ×
@@ -471,6 +498,7 @@ export default function FabrikRH() {
             >
               {isDownloadingDoc ? "Téléchargement..." : "Télécharger l'article PDF"}
             </button>
+            {docDownloadError && <p className="fabrik-popup-error">{docDownloadError}</p>}
           </div>
         </div>
       )}

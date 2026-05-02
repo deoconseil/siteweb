@@ -21,6 +21,8 @@ interface CloudinaryUploadResponse {
   secure_url?: string;
   url?: string;
   type?: string;
+  resource_type?: string;
+  format?: string;
   error?: {
     message?: string;
   };
@@ -41,6 +43,9 @@ const normalizePublicIdPart = (name: string): string =>
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "")
     .toLowerCase();
+
+const isCloudinaryRawPdfUrl = (url: string): boolean =>
+  url.includes("res.cloudinary.com") && url.includes("/raw/upload/") && url.toLowerCase().includes(".pdf");
 
 export default function AdminFabrikPopup() {
   const [form, setForm] = useState<FabrikPopupConfig>(EMPTY_CONFIG);
@@ -95,11 +100,10 @@ export default function AdminFabrikPopup() {
     const baseName = normalizePublicIdPart(file.name.replace(/\.[^.]+$/, "")) || "fabrik-rh-article";
     const publicId = `${baseName}-${Date.now()}.pdf`;
     const uploadPlan = [
-      { preset: CLOUDINARY_UPLOAD_PRESET, endpoint: "auto/upload" },
-      { preset: CLOUDINARY_UPLOAD_PRESET, endpoint: "image/upload" },
       { preset: CLOUDINARY_RAW_UPLOAD_PRESET, endpoint: "raw/upload" },
+      { preset: CLOUDINARY_UPLOAD_PRESET, endpoint: "raw/upload" },
       { preset: CLOUDINARY_RAW_UPLOAD_PRESET, endpoint: "auto/upload" },
-      { preset: CLOUDINARY_RAW_UPLOAD_PRESET, endpoint: "image/upload" },
+      { preset: CLOUDINARY_UPLOAD_PRESET, endpoint: "auto/upload" },
     ]
       .filter((candidate) => Boolean(candidate.preset))
       .filter(
@@ -123,6 +127,8 @@ export default function AdminFabrikPopup() {
       const data = (await res.json().catch(() => ({}))) as CloudinaryUploadResponse;
       if (res.ok) {
         const deliveryType = String(data.type || "upload").toLowerCase();
+        const resourceType = String(data.resource_type || "").toLowerCase();
+        const format = String(data.format || "").toLowerCase();
         const url = String(data.secure_url || data.url || "").trim();
         if (!url) {
           uploadErrors.push(`[${preset} | ${endpoint}] Cloudinary a repondu sans URL publique.`);
@@ -130,6 +136,18 @@ export default function AdminFabrikPopup() {
         }
         if (deliveryType !== "upload") {
           uploadErrors.push(`[${preset} | ${endpoint}] Fichier upload mais non public (type='${deliveryType}').`);
+          continue;
+        }
+        if (resourceType !== "raw") {
+          uploadErrors.push(`[${preset} | ${endpoint}] Type de ressource invalide '${resourceType || "unknown"}'.`);
+          continue;
+        }
+        if (format && format !== "pdf") {
+          uploadErrors.push(`[${preset} | ${endpoint}] Format invalide '${format}' (attendu: pdf).`);
+          continue;
+        }
+        if (!isCloudinaryRawPdfUrl(url)) {
+          uploadErrors.push(`[${preset} | ${endpoint}] URL retournee non conforme (raw/pdf).`);
           continue;
         }
         return url;
@@ -150,6 +168,15 @@ export default function AdminFabrikPopup() {
     if (privateTypeError) {
       throw new Error(
         "Le preset Cloudinary actuel stocke le PDF en mode prive/authentifie. Passez le preset en type 'upload' public."
+      );
+    }
+
+    const wrongResourceTypeError = uploadErrors.find((msg) =>
+      msg.includes("Type de ressource invalide") || msg.includes("Format invalide") || msg.includes("URL retournee non conforme")
+    );
+    if (wrongResourceTypeError) {
+      throw new Error(
+        "Cloudinary retourne un fichier image au lieu d'un vrai PDF. Configurez le preset pour accepter un upload RAW public."
       );
     }
 
@@ -192,6 +219,10 @@ export default function AdminFabrikPopup() {
     }
     if (!form.article.trim()) {
       setError("L'article PDF est obligatoire.");
+      return;
+    }
+    if (!isCloudinaryRawPdfUrl(form.article.trim())) {
+      setError("URL PDF invalide. Merci de re-uploader un vrai PDF (Cloudinary raw/upload).");
       return;
     }
 
