@@ -142,6 +142,8 @@ interface FabrikDocPopupConfig {
   state: "ON" | "OFF";
 }
 
+const FABRIK_DOC_POPUP_CACHE_KEY = "fabrik_doc_popup_config_v1";
+
 const toAttachmentName = (title: string): string => {
   const normalized = title
     .normalize("NFD")
@@ -240,6 +242,31 @@ export default function FabrikRH() {
 
   useEffect(() => {
     let isMounted = true;
+    const applyPopupConfig = (config: FabrikDocPopupConfig) => {
+      setDocPopupConfig(config);
+      setShowDocPopup(
+        config.state === "ON" &&
+        config.title.length > 0 &&
+        config.description.length > 0 &&
+        config.article.length > 0
+      );
+    };
+
+    try {
+      const cached = window.localStorage.getItem(FABRIK_DOC_POPUP_CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached) as Partial<FabrikDocPopupConfig>;
+        const cachedConfig: FabrikDocPopupConfig = {
+          title: String(parsed.title || "").trim(),
+          description: String(parsed.description || "").trim(),
+          article: String(parsed.article || "").trim(),
+          state: String(parsed.state || "OFF").toUpperCase() === "ON" ? "ON" : "OFF",
+        };
+        applyPopupConfig(cachedConfig);
+      }
+    } catch {
+      // Ignore local cache parsing errors.
+    }
 
     const fetchPopupConfig = async () => {
       const res = await gasGet<{
@@ -258,13 +285,12 @@ export default function FabrikRH() {
         state: String(res.data.state || "OFF").toUpperCase() === "ON" ? "ON" : "OFF",
       };
 
-      setDocPopupConfig(normalized);
-      setShowDocPopup(
-        normalized.state === "ON" &&
-        normalized.title.length > 0 &&
-        normalized.description.length > 0 &&
-        normalized.article.length > 0
-      );
+      applyPopupConfig(normalized);
+      try {
+        window.localStorage.setItem(FABRIK_DOC_POPUP_CACHE_KEY, JSON.stringify(normalized));
+      } catch {
+        // Ignore localStorage write errors.
+      }
     };
 
     fetchPopupConfig();
