@@ -117,7 +117,7 @@ export default function ADN() {
           {/* ── LEFT : schéma identité organisationnelle ── */}
           <div className="adn-roadmap__left adn-roadmap__left--schema">
             <img
-              src="https://d2xsxph8kpxj0f.cloudfront.net/89599327/Kg3MR7aJ6wLfgVCatcFEoP/adn-schema-final_918a9d35.png"
+              src="/images/adn-left-schema.png"
               alt="Schéma Identité Organisationnelle DEO Conseil — Raison d'être, Vision, ADN"
               className="adn-schema-img"
             />
@@ -243,3 +243,4 @@ export default function ADN() {
     </>
   );
 }
+
