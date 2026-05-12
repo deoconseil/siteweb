@@ -16,26 +16,38 @@ const PHOTO_LEADERSHIP = "https://d2xsxph8kpxj0f.cloudfront.net/89599327/Kg3MR7a
 const piliers = [
   {
     num: "01",
-    title: "Recherche & Innovation RH",
-    text: "Veille permanente sur les pratiques RH mondiales et adaptation au contexte africain et proche-oriental. Nous étudions les tendances émergentes pour aider les organisations à anticiper les mutations.",
+    title: "Espace communautaire",
+    text: "Créer une dynamique communautaire pour accompagner la mutation des pratiques RH dans une nouvelle ère.",
     accent: "var(--red)",
   },
   {
     num: "02",
-    title: "Outils & Méthodes",
-    text: "Développement de frameworks et outils propriétaires testés en conditions réelles depuis plus de 20 ans. Nos méthodes sont pragmatiques, mesurables et adaptées aux organisations africaines.",
+    title: "Réseau d'experts",
+    text: "Fédération d'experts sélectionnés par compétences, valeurs et vision du monde.",
     accent: "var(--red)",
   },
   {
     num: "03",
-    title: "Communauté RH",
-    text: "Un réseau de 1000+ DRH, dirigeants et experts connectés autour des enjeux RH. Nous créons des espaces de dialogue, d'apprentissage et de co-construction.",
+    title: "Partage & Pratiques",
+    text: "Un lieu de partage des expériences et des meilleures pratiques RH.",
     accent: "#888",
   },
   {
     num: "04",
-    title: "Publications & Insights",
-    text: "Analyses, études, rapports et contenus exclusifs sur les enjeux RH au Maroc, en Afrique et à l'international. Nous partageons notre expertise pour nourrir la réflexion collective.",
+    title: "Débats & Études",
+    text: "Espace de débats et d'études autour des transformations des organisations.",
+    accent: "#888",
+  },
+  {
+    num: "05",
+    title: "Innovation managériale",
+    text: "Promotion de toutes les innovations en matière de management et développement du leadership.",
+    accent: "#888",
+  },
+  {
+    num: "06",
+    title: "Révolution digitale",
+    text: "Le numérique au cœur de toutes les transformations humaines et organisationnelles.",
     accent: "#888",
   },
 ];
@@ -92,6 +104,7 @@ const SECTEUR_OPTIONS = [
 
 type FabrikStatus = "idle" | "sending" | "sent" | "error";
 type CvUploadStatus = "idle" | "uploading" | "uploaded" | "error";
+type DocLeadStatus = "idle" | "sending" | "sent" | "error";
 
 interface FabrikFormState {
   prenom: string;
@@ -142,7 +155,24 @@ interface FabrikDocPopupConfig {
   state: "ON" | "OFF";
 }
 
+interface DocLeadFormState {
+  nom: string;
+  prenom: string;
+  email: string;
+  telephone: string;
+  entreprise: string;
+  fonction: string;
+}
+
 const FABRIK_DOC_POPUP_CACHE_KEY = "fabrik_doc_popup_config_v1";
+const initialDocLeadFormState: DocLeadFormState = {
+  nom: "",
+  prenom: "",
+  email: "",
+  telephone: "",
+  entreprise: "",
+  fonction: "",
+};
 
 const toAttachmentName = (title: string): string => {
   const normalized = title
@@ -176,7 +206,18 @@ export default function FabrikRH() {
   const [showDocPopup, setShowDocPopup] = useState(false);
   const [isDownloadingDoc, setIsDownloadingDoc] = useState(false);
   const [docDownloadError, setDocDownloadError] = useState("");
+  const [docLeadForm, setDocLeadForm] = useState<DocLeadFormState>(initialDocLeadFormState);
+  const [docLeadStatus, setDocLeadStatus] = useState<DocLeadStatus>("idle");
+  const [docLeadError, setDocLeadError] = useState("");
   const cvUploadRequestId = useRef(0);
+
+  const closeDocPopup = () => {
+    setShowDocPopup(false);
+    setDocDownloadError("");
+    setDocLeadError("");
+    setDocLeadStatus("idle");
+    setDocLeadForm(initialDocLeadFormState);
+  };
 
   const downloadPopupArticle = async (url: string, title: string) => {
     const filename = `${toAttachmentName(title)}.pdf`;
@@ -228,6 +269,39 @@ export default function FabrikRH() {
 
   const toggleItem = (index: number) => {
     setOpenIndex((prev) => (prev === index ? null : index));
+  };
+
+  const updateDocLeadField = <K extends keyof DocLeadFormState>(key: K, value: DocLeadFormState[K]) => {
+    setDocLeadForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleDocLeadSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!docPopupConfig) return;
+    setDocLeadError("");
+    setDocDownloadError("");
+    setDocLeadStatus("sending");
+    try {
+      const payload = {
+        action: "submitCatalogue",
+        nom: docLeadForm.nom.trim(),
+        prenom: docLeadForm.prenom.trim(),
+        email: docLeadForm.email.trim(),
+        telephone: docLeadForm.telephone.trim(),
+        entreprise: docLeadForm.entreprise.trim(),
+        fonction: docLeadForm.fonction.trim(),
+        source: "fabrik-popup-article",
+      };
+      const res = await gasPost(payload);
+      if (!res.ok) {
+        throw new Error(res.error || "Envoi impossible.");
+      }
+      setDocLeadStatus("sent");
+      await downloadPopupArticle(docPopupConfig.article, docPopupConfig.title);
+    } catch (err) {
+      setDocLeadStatus("error");
+      setDocLeadError(err instanceof Error ? err.message : "Une erreur est survenue.");
+    }
   };
 
   const updateField = <K extends keyof FabrikFormState>(key: K, value: FabrikFormState[K]) => {
@@ -506,8 +580,7 @@ export default function FabrikRH() {
           className="fabrik-doc-popup-overlay"
           onClick={(event) => {
             if (event.target === event.currentTarget) {
-              setShowDocPopup(false);
-              setDocDownloadError("");
+              closeDocPopup();
             }
           }}
         >
@@ -515,10 +588,7 @@ export default function FabrikRH() {
             <button
               type="button"
               className="fabrik-doc-popup-close"
-              onClick={() => {
-                setShowDocPopup(false);
-                setDocDownloadError("");
-              }}
+              onClick={closeDocPopup}
               aria-label="Fermer"
             >
               ×
@@ -526,15 +596,81 @@ export default function FabrikRH() {
             <img src={FABRIK_LOGO} alt="Logo La Fabrik RH" className="fabrik-doc-popup-logo" />
             <h3>{docPopupConfig.title}</h3>
             <p>{docPopupConfig.description}</p>
-            <button
-              type="button"
-              className="fabrik-doc-popup-btn"
-              onClick={() => downloadPopupArticle(docPopupConfig.article, docPopupConfig.title)}
-              disabled={isDownloadingDoc}
-            >
-              {isDownloadingDoc ? "Téléchargement..." : "Télécharger l'article PDF"}
-            </button>
-            {docDownloadError && <p className="fabrik-popup-error">{docDownloadError}</p>}
+            {docLeadStatus === "sent" ? (
+              <>
+                <p style={{ marginTop: "12px" }}>
+                  Merci. Le téléchargement va démarrer automatiquement.
+                </p>
+                <button
+                  type="button"
+                  className="fabrik-doc-popup-btn"
+                  onClick={() => downloadPopupArticle(docPopupConfig.article, docPopupConfig.title)}
+                  disabled={isDownloadingDoc}
+                >
+                  {isDownloadingDoc ? "Téléchargement..." : "Retélécharger l'article PDF"}
+                </button>
+              </>
+            ) : (
+              <form onSubmit={handleDocLeadSubmit} style={{ marginTop: "18px" }}>
+                <div className="modal-row-2">
+                  <input
+                    type="text"
+                    name="nom"
+                    required
+                    placeholder="Nom"
+                    className="modal-input"
+                    value={docLeadForm.nom}
+                    onChange={(e) => updateDocLeadField("nom", e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    name="prenom"
+                    required
+                    placeholder="Prénom"
+                    className="modal-input"
+                    value={docLeadForm.prenom}
+                    onChange={(e) => updateDocLeadField("prenom", e.target.value)}
+                  />
+                </div>
+                <input
+                  type="tel"
+                  name="telephone"
+                  placeholder="Téléphone"
+                  className="modal-input"
+                  value={docLeadForm.telephone}
+                  onChange={(e) => updateDocLeadField("telephone", e.target.value)}
+                />
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  placeholder="E-mail"
+                  className="modal-input"
+                  value={docLeadForm.email}
+                  onChange={(e) => updateDocLeadField("email", e.target.value)}
+                />
+                <input
+                  type="text"
+                  name="entreprise"
+                  placeholder="Entreprise"
+                  className="modal-input"
+                  value={docLeadForm.entreprise}
+                  onChange={(e) => updateDocLeadField("entreprise", e.target.value)}
+                />
+                <input
+                  type="text"
+                  name="fonction"
+                  placeholder="Fonction"
+                  className="modal-input"
+                  value={docLeadForm.fonction}
+                  onChange={(e) => updateDocLeadField("fonction", e.target.value)}
+                />
+                <button type="submit" className="fabrik-doc-popup-btn" disabled={docLeadStatus === "sending" || isDownloadingDoc}>
+                  {docLeadStatus === "sending" ? "Envoi..." : (isDownloadingDoc ? "Téléchargement..." : "Télécharger l'article PDF")}
+                </button>
+              </form>
+            )}
+            {(docLeadError || docDownloadError) && <p className="fabrik-popup-error">{docLeadError || docDownloadError}</p>}
           </div>
         </div>
       )}
@@ -546,7 +682,7 @@ export default function FabrikRH() {
           <div className="page-hero__content">
             <span className="page-hero__tag">THINK TANK</span>
             <h1>La Fabrik <em>RH</em></h1>
-            <p>Notre think tank au service de la réflexion et de l'action pour les RH de demain.</p>
+            <p>Communauté RH · Innovation · Leadership.</p>
             <div className="page-hero__accent"></div>
           </div>
         </div>
@@ -556,8 +692,8 @@ export default function FabrikRH() {
           <div className="pi-inner">
             <span className="pi-tag">NOTRE THINK TANK</span>
             <h2 className="pi-title">Qu'est-ce que la <span className="pi-red">Fabrik RH</span> ?</h2>
-            <p className="pi-text">La Fabrik RH est le think tank de DEO Conseil. Depuis 2002, nous traitons régulièrement de sujets divers et publions sous différents formats pour prendre des initiatives et mener des études sur les enjeux d'entreprise dans le contexte marocain, africain et international.</p>
-            <p className="pi-text">Notre mission : contribuer à l'émergence d'une pensée RH nouvelle, adaptée aux réalités du terrain et aux mutations du monde du travail.</p>
+            <p className="pi-text">À l'ère de la fonction RH réinventée, réfléchir, coconstruire, vulgariser et incarner sont les ambitions de ce think tank.</p>
+            <p className="pi-text">La Fabrik RH est le think tank de DEO Conseil : fabriquer une pensée RH nouvelle, adaptée aux réalités du terrain et aux mutations du monde du travail.</p>
           </div>
         </section>
 
@@ -573,8 +709,8 @@ export default function FabrikRH() {
           <div className="fabrik-vuca__bg-text">FABRIK</div>
           <div className="fabrik-vuca__inner">
             <div className="fabrik-vuca__header">
-              <span className="fabrik-vuca__tag">NOS FONDAMENTAUX</span>
-              <h2 className="fabrik-vuca__title">Les piliers de la <em>Fabrik RH</em></h2>
+              <span className="fabrik-vuca__tag">QUE VOULONS-NOUS ADRESSER ?</span>
+              <h2 className="fabrik-vuca__title">Notre <em>ADN</em></h2>
               <div className="fabrik-vuca__title-line"></div>
             </div>
 
@@ -610,18 +746,18 @@ export default function FabrikRH() {
             {/* Stats bar */}
             <div className="fabrik-vuca__stats">
               <div className="fabrik-vuca__stat">
-                <span className="fabrik-vuca__stat-num fabrik-number-emphasis">20<span>+</span></span>
-                <span className="fabrik-vuca__stat-label">ans d'expertises</span>
+                <span className="fabrik-vuca__stat-num fabrik-number-emphasis">6<span>+</span></span>
+                <span className="fabrik-vuca__stat-label">axes de transformation</span>
               </div>
               <div className="fabrik-vuca__stat-sep"></div>
               <div className="fabrik-vuca__stat">
-                <span className="fabrik-vuca__stat-num fabrik-number-emphasis">50<span>+</span></span>
-                <span className="fabrik-vuca__stat-label">Publications</span>
+                <span className="fabrik-vuca__stat-num fabrik-number-emphasis">10<span>+</span></span>
+                <span className="fabrik-vuca__stat-label">formats d'écosystème</span>
               </div>
               <div className="fabrik-vuca__stat-sep"></div>
               <div className="fabrik-vuca__stat">
-                <span className="fabrik-vuca__stat-num fabrik-number-emphasis">1000<span>+</span></span>
-                <span className="fabrik-vuca__stat-label">Experts connectés</span>
+                <span className="fabrik-vuca__stat-num fabrik-number-emphasis">1<span>+</span></span>
+                <span className="fabrik-vuca__stat-label">communauté RH engagée</span>
               </div>
             </div>
           </div>
@@ -639,24 +775,24 @@ export default function FabrikRH() {
         {/* ═══ PUBLICATIONS — fond cream ═══ */}
         <section className="pi-section pi-section--cream">
           <div className="pi-inner">
-            <span className="pi-tag">NOS FORMATS</span>
-            <h2 className="pi-title">Publications & <span className="pi-red">Formats</span></h2>
+            <span className="pi-tag">NOTRE ÉCOSYSTÈME</span>
+            <h2 className="pi-title">10 formats pour créer, partager & <span className="pi-red">innover</span></h2>
             <div className="pi-grid pi-grid--2">
               <div className="pi-card pi-card--cream pi-card--border-left">
-                <h3 className="pi-card-title">Articles & Éditos</h3>
-                <p className="pi-card-text">Analyses approfondies sur les tendances RH, le leadership, la transformation organisationnelle et les enjeux du monde du travail.</p>
+                <h3 className="pi-card-title">Webinaires · Newsletter · Baromètre</h3>
+                <p className="pi-card-text">Sessions live RH, veille & actualités, données et enquêtes pour éclairer les décisions.</p>
               </div>
               <div className="pi-card pi-card--cream pi-card--border-left">
-                <h3 className="pi-card-title">Études & Rapports</h3>
-                <p className="pi-card-text">Recherches quantitatives et qualitatives sur des sujets spécifiques (engagement, culture, transformation digitale, etc.).</p>
+                <h3 className="pi-card-title">Masterclass · Publications</h3>
+                <p className="pi-card-text">Formations d'experts, articles et guides pour structurer les pratiques RH de demain.</p>
               </div>
               <div className="pi-card pi-card--cream pi-card--border-left">
-                <h3 className="pi-card-title">Webinaires & Conférences</h3>
-                <p className="pi-card-text">Sessions d'apprentissage et d'échange avec experts, dirigeants et praticiens du terrain.</p>
+                <h3 className="pi-card-title">Forum Annuel · Matins de la Fabrik RH · Mentors & pairs RH</h3>
+                <p className="pi-card-text">Des rendez-vous de réflexion, de transmission et de co-développement entre praticiens.</p>
               </div>
               <div className="pi-card pi-card--cream pi-card--border-left">
-                <h3 className="pi-card-title">Podcasts & Vidéos</h3>
-                <p className="pi-card-text">Contenus audio et vidéo pour explorer les enjeux RH de manière accessible et engageante.</p>
+                <h3 className="pi-card-title">Afterwork · Podcast</h3>
+                <p className="pi-card-text">Networking, lien communautaire et contenus audio pour diffuser les idées qui transforment.</p>
               </div>
             </div>
           </div>
@@ -668,11 +804,11 @@ export default function FabrikRH() {
             <img src={PHOTO_LEADERSHIP} alt="Communauté Fabrik RH" />
           </div>
           <div className="fabrik-photo-immersive__content">
-            <div className="fabrik-photo-immersive__tag">COMMUNAUTÉ FABRIK RH</div>
-            <h2 className="fabrik-photo-immersive__title">1 000<span>+</span><br />experts connectés</h2>
+            <div className="fabrik-photo-immersive__tag">NOS PARTENAIRES</div>
+            <h2 className="fabrik-photo-immersive__title">Un réseau de<span> </span><br />partenaires de confiance</h2>
             <p className="fabrik-photo-immersive__text">
-              DRH, dirigeants, consultants et experts RH du Maroc, d'Afrique et d'Europe
-              — unis autour d'une vision commune du capital humain.
+              La Fabrik RH s'appuie sur des partenaires de confiance pour accompagner
+              les entreprises et les organisations dans leurs transformations humaines.
             </p>
             <a className="fabrik-photo-immersive__btn" href="#fabrik-formulaire">Rejoindre la communauté →</a>
           </div>
@@ -683,27 +819,27 @@ export default function FabrikRH() {
           <div className="pi-inner">
             <span className="pi-tag">COMMUNAUTÉ</span>
             <h2 className="pi-title pi-title--white">Rejoignez la <span className="pi-red">Communauté</span> Fabrik RH</h2>
-            <p className="pi-text pi-text--light">Que vous soyez DRH, dirigeant, consultant ou expert en RH, la Fabrik RH vous offre un espace pour apprendre, partager et co-créer les pratiques RH de demain.</p>
+            <p className="pi-text pi-text--light">Fabriquons ensemble la RH de demain. Nous réunissons directions générales, DRH, experts, chercheurs, start-ups RH et professionnels passionnés.</p>
             <div className="pi-grid pi-grid--4" style={{ marginBottom: "32px" }}>
               <div className="pi-mini-card">
                 <div className="pi-mini-icon">✓</div>
-                <h4>Accès aux publications</h4>
-                <p>Articles, études et rapports exclusifs</p>
+                <h4>Directions & DRH</h4>
+                <p>Comités de direction, secrétaires généraux et fonctions RH.</p>
               </div>
               <div className="pi-mini-card">
                 <div className="pi-mini-icon">✓</div>
-                <h4>Réseau d'experts</h4>
-                <p>Connectez-vous avec d'autres praticiens</p>
+                <h4>Start-ups RH</h4>
+                <p>Innovation, EdTech et nouvelles approches du capital humain.</p>
               </div>
               <div className="pi-mini-card">
                 <div className="pi-mini-icon">✓</div>
-                <h4>Événements & Webinaires</h4>
-                <p>Sessions d'apprentissage régulières</p>
+                <h4>Professeurs & Chercheurs</h4>
+                <p>Universités, écoles et experts en sciences humaines.</p>
               </div>
               <div className="pi-mini-card">
                 <div className="pi-mini-icon">✓</div>
-                <h4>Outils & Ressources</h4>
-                <p>Frameworks et templates à utiliser</p>
+                <h4>Réseau international</h4>
+                <p>Professionnels nationaux et internationaux engagés.</p>
               </div>
             </div>
             <p className="pi-text pi-text--light" style={{ textAlign: "center" }}>
