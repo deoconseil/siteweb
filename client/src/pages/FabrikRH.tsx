@@ -27,7 +27,7 @@ const PARTNER_LOGOS = [
   {
     key: "people-company",
     name: "People & Company",
-    src: "https://cdn.prod.website-files.com/672a3241ca864fbc59f730e0/672a32425f7e3f333704afab_Deursticker_white.png",
+    src: "/images/partners/people-company-logo.svg",
     bg: "#efefef",
   },
 ];

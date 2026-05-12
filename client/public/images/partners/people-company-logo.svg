@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="500" viewBox="0 0 680 500" role="img" aria-label="People and Company">
+  <rect width="680" height="500" fill="#efefef"/>
+  <g transform="translate(0,0)">
+    <text x="340" y="220" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="78" fill="#333333" letter-spacing="0.2">People</text>
+    <rect x="252" y="114" width="102" height="102" fill="#3f3f3f" transform="rotate(6 303 165)"/>
+    <text x="304" y="191" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="86" fill="#ffffff">&amp;</text>
+    <text x="476" y="220" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="78" fill="#333333" letter-spacing="0.2">Company</text>
+    <text x="340" y="330" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-style="italic" font-size="62" fill="#666666">Be Different !</text>
+  </g>
+</svg>
