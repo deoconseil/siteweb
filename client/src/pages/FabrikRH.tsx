@@ -11,7 +11,26 @@ import {
 import FABRIK_LOGO from "@/assets/fabrik-rh-logo.png";
 
 const BANNER_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/89599327/Kg3MR7aJ6wLfgVCatcFEoP/banner-fabrik_1ded06c1.jpg";
-const PHOTO_LEADERSHIP = "https://d2xsxph8kpxj0f.cloudfront.net/89599327/Kg3MR7aJ6wLfgVCatcFEoP/photo-leadership-women_02c59ba8.jpg";
+const PARTNER_LOGOS = [
+  {
+    key: "deo",
+    name: "DEO Conseil",
+    src: "https://deoconseil.com/wp-content/uploads/elementor/thumbs/logo-footer-polc7w0k54rgr9jtz50itm1m0b0eowuwjefg79qsoa.png",
+    bg: "#f3f3f3",
+  },
+  {
+    key: "evotrust",
+    name: "Evotrust",
+    src: "/images/partners/evotrust-logo.png",
+    bg: "#1f252c",
+  },
+  {
+    key: "people-company",
+    name: "People & Company",
+    src: "https://cdn.prod.website-files.com/672a3241ca864fbc59f730e0/672a32425f7e3f333704afab_Deursticker_white.png",
+    bg: "#efefef",
+  },
+];
 
 const piliers = [
   {
@@ -745,21 +764,41 @@ export default function FabrikRH() {
               })}
             </div>
 
-            {/* Stats bar */}
-            <div className="fabrik-vuca__stats">
-              <div className="fabrik-vuca__stat">
-                <span className="fabrik-vuca__stat-num fabrik-number-emphasis">4<span>+</span></span>
-                <span className="fabrik-vuca__stat-label">ce que nous ne sommes pas</span>
+            {/* PAGE 4 — POSITIONNEMENT (cartes) */}
+            <div className="pi-grid pi-grid--4" style={{ marginTop: "28px" }}>
+              <div className="pi-mini-card">
+                <div className="pi-mini-icon">✗</div>
+                <h4>Pas un club</h4>
               </div>
-              <div className="fabrik-vuca__stat-sep"></div>
-              <div className="fabrik-vuca__stat">
-                <span className="fabrik-vuca__stat-num fabrik-number-emphasis">3<span>+</span></span>
-                <span className="fabrik-vuca__stat-label">fondations de positionnement</span>
+              <div className="pi-mini-card">
+                <div className="pi-mini-icon">✗</div>
+                <h4>Pas une association</h4>
               </div>
-              <div className="fabrik-vuca__stat-sep"></div>
-              <div className="fabrik-vuca__stat">
-                <span className="fabrik-vuca__stat-num fabrik-number-emphasis">1<span>+</span></span>
-                <span className="fabrik-vuca__stat-label">vision RH partagée</span>
+              <div className="pi-mini-card">
+                <div className="pi-mini-icon">✗</div>
+                <h4>Pas une structure fermée</h4>
+              </div>
+              <div className="pi-mini-card">
+                <div className="pi-mini-icon">✗</div>
+                <h4>Pas un événement isolé</h4>
+              </div>
+            </div>
+            <div className="pi-grid pi-grid--4" style={{ marginTop: "14px" }}>
+              <div className="pi-mini-card">
+                <div className="pi-mini-icon">✓</div>
+                <h4>Un réseau d'experts et de passionnés</h4>
+              </div>
+              <div className="pi-mini-card">
+                <div className="pi-mini-icon">✓</div>
+                <h4>Au service des dynamiques humaines</h4>
+              </div>
+              <div className="pi-mini-card">
+                <div className="pi-mini-icon">✓</div>
+                <h4>Pour une création de valeur durable</h4>
+              </div>
+              <div className="pi-mini-card">
+                <div className="pi-mini-icon">✓</div>
+                <h4>Ouvert, inclusif et en mouvement</h4>
               </div>
             </div>
           </div>
@@ -800,19 +839,60 @@ export default function FabrikRH() {
           </div>
         </section>
 
-        {/* ═══ PHOTO IMMERSIVE FABRIK RH ═══ */}
-        <div className="fabrik-photo-immersive">
-          <div className="fabrik-photo-immersive__img-wrap">
-            <img src={PHOTO_LEADERSHIP} alt="Communauté Fabrik RH" />
-          </div>
-          <div className="fabrik-photo-immersive__content">
-            <div className="fabrik-photo-immersive__tag">NOTRE ÉCOSYSTÈME</div>
-            <h2 className="fabrik-photo-immersive__title">10 formats pour créer,<br />partager & innover</h2>
-            <p className="fabrik-photo-immersive__text">
-              Webinaires, newsletter, baromètre, masterclass, publications, forum annuel,
-              matins de la Fabrik RH, mentors & pairs RH, afterwork et podcast. La Fabrik RH s'appuie sur des partenaires de confiance pour vous accompagner.
-            </p>
-            <a className="fabrik-photo-immersive__btn" href="#fabrik-formulaire">Rejoindre la communauté →</a>
+        {/* ═══ PAGE 3 — NOS PARTENAIRES (cartes) ═══ */}
+        <div className="pi-section pi-section--cream">
+          <div className="pi-inner">
+            <span className="pi-tag">QUE VOULONS NOUS ADRESSER ?</span>
+            <h2 className="pi-title">Nos <span className="pi-red">partenaires</span></h2>
+            <div className="pi-card pi-card--cream pi-card--border-left" style={{ marginBottom: "22px" }}>
+              <h3 className="pi-card-title">La Fabrik RH · DEO Conseil</h3>
+              <p className="pi-card-text">La Fabrik RH s'appuie sur des partenaires de confiance pour vous accompagner.</p>
+            </div>
+            <div style={{ display: "flex", justifyContent: "center", margin: "10px 0 8px" }}>
+              <div
+                style={{
+                  border: "1px solid rgba(200,16,46,0.35)",
+                  borderRadius: "20px",
+                  background: "#fff",
+                  padding: "14px 20px",
+                  boxShadow: "0 10px 28px rgba(0,0,0,0.08)",
+                }}
+              >
+                <img src={FABRIK_LOGO} alt="La Fabrik RH" style={{ height: "44px", width: "auto", display: "block" }} />
+              </div>
+            </div>
+            <div style={{ width: "2px", height: "26px", background: "rgba(200,16,46,0.45)", margin: "0 auto" }}></div>
+            <div style={{ height: "2px", background: "rgba(200,16,46,0.45)", width: "72%", margin: "0 auto 18px" }}></div>
+            <div className="pi-grid" style={{ alignItems: "stretch", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
+              {PARTNER_LOGOS.map((partner) => (
+                <div
+                  key={partner.key}
+                  className="pi-card"
+                  style={{
+                    background: partner.bg,
+                    borderRadius: "20px",
+                    padding: "18px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    minHeight: "140px",
+                  }}
+                >
+                  <img
+                    src={partner.src}
+                    alt={partner.name}
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "84px",
+                      width: "auto",
+                      height: "auto",
+                      display: "block",
+                      borderRadius: "20px",
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
