@@ -398,6 +398,8 @@ function saveFabrikPopupConfig(body) {
 function submitCatalogue(body) {
   const sheet = getSheet("Catalogue");
   const id = generateId();
+  const source = String(body.source || "").toLowerCase();
+  const isFabrikArticle = source === "fabrik-popup-article";
   const row = [
     id,
     nowStr(),
@@ -411,9 +413,18 @@ function submitCatalogue(body) {
   ];
   sheet.appendRow(row);
 
-  sendEmail(ADMIN_EMAIL, `📚 Téléchargement catalogue — ${body.prenom || ""} ${body.nom || ""}`, emailCatalogueAdmin(body));
+  const adminSubject = isFabrikArticle
+    ? `📄 Téléchargement article Fabrik RH — ${body.prenom || ""} ${body.nom || ""}`
+    : `📚 Téléchargement catalogue — ${body.prenom || ""} ${body.nom || ""}`;
+  const adminHtml = isFabrikArticle ? emailFabrikArticleAdmin(body) : emailCatalogueAdmin(body);
+  const userSubject = isFabrikArticle
+    ? `Votre article Fabrik RH — DEO Conseil`
+    : `Votre catalogue DEO Conseil`;
+  const userHtml = isFabrikArticle ? emailFabrikArticleUser(body) : emailCatalogueUser(body);
+
+  sendEmail(ADMIN_EMAIL, adminSubject, adminHtml);
   if (body.email) {
-    sendEmail(body.email, `Votre catalogue DEO Conseil`, emailCatalogueUser(body));
+    sendEmail(body.email, userSubject, userHtml);
   }
 
   return { success: true, id };
@@ -849,6 +860,52 @@ function emailCatalogueUser(b) {
     Email : <a href="mailto:contact@deo-conseil.com" style="color:#C8102E;">contact@deo-conseil.com</a></p>
     <p style="color:#555;font-size:15px;line-height:1.6;">A tres bientot,<br><strong>L'equipe DEO Conseil</strong></p>`;
   return emailWrapper("Votre catalogue DEO Conseil", content);
+}
+
+function emailFabrikArticleAdmin(b) {
+  const articleTitle = b.articleTitle || "Article Fabrik RH";
+  const articleUrl = b.articleUrl || "";
+  const content = `
+    <p style="color:#555;font-size:15px;margin:0 0 20px;">Un article Fabrik RH a ete demande via le popup de telechargement.</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+      ${fieldRow("Prenom", b.prenom)}
+      ${fieldRow("Nom", b.nom)}
+      ${fieldRow("Email", b.email)}
+      ${fieldRow("Telephone", b.telephone)}
+      ${fieldRow("Entreprise", b.entreprise)}
+      ${fieldRow("Fonction", b.fonction)}
+      ${fieldRow("Article", articleTitle)}
+      ${fieldRow("Lien article PDF", articleUrl)}
+    </table>`;
+  return emailWrapper("Telechargement article Fabrik RH — " + (b.prenom || "") + " " + (b.nom || ""), content);
+}
+
+function emailFabrikArticleUser(b) {
+  const prenom = b.prenom || b.nom || "";
+  const articleTitle = b.articleTitle || "Article Fabrik RH";
+  const articleUrl = b.articleUrl || "";
+  const ctaHtml = articleUrl
+    ? `<a href="${articleUrl}"
+         style="background:#C8102E;color:#fff;padding:16px 36px;border-radius:6px;text-decoration:none;font-weight:700;font-size:16px;display:inline-block;">
+        Telecharger l'article
+      </a>`
+    : `<span
+         style="background:#C8102E;color:#fff;padding:16px 36px;border-radius:6px;text-decoration:none;font-weight:700;font-size:16px;display:inline-block;">
+        Telecharger l'article
+      </span>`;
+
+  const content = `
+    <p style="color:#555;font-size:15px;line-height:1.6;">Bonjour <strong>${prenom}</strong>,</p>
+    <p style="color:#555;font-size:15px;line-height:1.6;">Merci pour votre interet pour la Fabrik RH. Voici votre article :</p>
+    <p style="color:#1a1a1a;font-size:16px;font-weight:700;line-height:1.5;">${articleTitle}</p>
+    <div style="text-align:center;margin:32px 0;">
+      ${ctaHtml}
+    </div>
+    <p style="color:#555;font-size:15px;line-height:1.6;">Pour toute question, contactez-nous :<br>
+    Tel : +212 (0)5 22 94 42 74<br>
+    Email : <a href="mailto:contact@deo-conseil.com" style="color:#C8102E;">contact@deo-conseil.com</a></p>
+    <p style="color:#555;font-size:15px;line-height:1.6;">A tres bientot,<br><strong>L'equipe DEO Conseil</strong></p>`;
+  return emailWrapper("Votre article Fabrik RH", content);
 }
 
 // ── Newsletter ──

@@ -290,6 +290,8 @@ export default function FabrikRH() {
         telephone: docLeadForm.telephone.trim(),
         entreprise: docLeadForm.entreprise.trim(),
         fonction: docLeadForm.fonction.trim(),
+        articleTitle: docPopupConfig.title,
+        articleUrl: docPopupConfig.article,
         source: "fabrik-popup-article",
       };
       const res = await gasPost(payload);
@@ -680,9 +682,9 @@ export default function FabrikRH() {
         <div className="page-hero page-hero--img" style={{ backgroundImage: `url(${BANNER_IMG})` }}>
           <div className="page-hero__overlay"></div>
           <div className="page-hero__content">
-            <span className="page-hero__tag">THINK TANK</span>
+            <span className="page-hero__tag">THINK TANK · DEO CONSEIL</span>
             <h1>La Fabrik <em>RH</em></h1>
-            <p>Communauté RH · Innovation · Leadership.</p>
+            <p>A l'ère de la fonction RH réinventée : réfléchir, coconstruire, vulgariser, incarner.</p>
             <div className="page-hero__accent"></div>
           </div>
         </div>
@@ -690,10 +692,10 @@ export default function FabrikRH() {
         {/* ═══ INTRO — fond cream ═══ */}
         <section className="pi-section pi-section--cream">
           <div className="pi-inner">
-            <span className="pi-tag">NOTRE THINK TANK</span>
+            <span className="pi-tag">COMMUNAUTÉ RH · INNOVATION · LEADERSHIP</span>
             <h2 className="pi-title">Qu'est-ce que la <span className="pi-red">Fabrik RH</span> ?</h2>
-            <p className="pi-text">À l'ère de la fonction RH réinventée, réfléchir, coconstruire, vulgariser et incarner sont les ambitions de ce think tank.</p>
-            <p className="pi-text">La Fabrik RH est le think tank de DEO Conseil : fabriquer une pensée RH nouvelle, adaptée aux réalités du terrain et aux mutations du monde du travail.</p>
+            <p className="pi-text">La Fabrik RH est le think tank de DEO Conseil. C'est aussi fabriquer une pensée RH nouvelle, adaptée aux réalités du terrain et aux mutations du monde du travail.</p>
+            <p className="pi-text">Positionnement : ce que nous sommes et ne sommes pas. Pas un club, pas une association, pas une structure fermée, pas un événement isolé. Un réseau d'experts et de passionnés, ouvert, inclusif et en mouvement, au service des dynamiques humaines et de la création de valeur durable.</p>
           </div>
         </section>
 
@@ -709,7 +711,7 @@ export default function FabrikRH() {
           <div className="fabrik-vuca__bg-text">FABRIK</div>
           <div className="fabrik-vuca__inner">
             <div className="fabrik-vuca__header">
-              <span className="fabrik-vuca__tag">QUE VOULONS-NOUS ADRESSER ?</span>
+              <span className="fabrik-vuca__tag">QUE VOULONS NOUS ADRESSER ?</span>
               <h2 className="fabrik-vuca__title">Notre <em>ADN</em></h2>
               <div className="fabrik-vuca__title-line"></div>
             </div>
@@ -746,18 +748,18 @@ export default function FabrikRH() {
             {/* Stats bar */}
             <div className="fabrik-vuca__stats">
               <div className="fabrik-vuca__stat">
-                <span className="fabrik-vuca__stat-num fabrik-number-emphasis">6<span>+</span></span>
-                <span className="fabrik-vuca__stat-label">axes de transformation</span>
+                <span className="fabrik-vuca__stat-num fabrik-number-emphasis">4<span>+</span></span>
+                <span className="fabrik-vuca__stat-label">ce que nous ne sommes pas</span>
               </div>
               <div className="fabrik-vuca__stat-sep"></div>
               <div className="fabrik-vuca__stat">
-                <span className="fabrik-vuca__stat-num fabrik-number-emphasis">10<span>+</span></span>
-                <span className="fabrik-vuca__stat-label">formats d'écosystème</span>
+                <span className="fabrik-vuca__stat-num fabrik-number-emphasis">3<span>+</span></span>
+                <span className="fabrik-vuca__stat-label">fondations de positionnement</span>
               </div>
               <div className="fabrik-vuca__stat-sep"></div>
               <div className="fabrik-vuca__stat">
                 <span className="fabrik-vuca__stat-num fabrik-number-emphasis">1<span>+</span></span>
-                <span className="fabrik-vuca__stat-label">communauté RH engagée</span>
+                <span className="fabrik-vuca__stat-label">vision RH partagée</span>
               </div>
             </div>
           </div>
@@ -775,24 +777,24 @@ export default function FabrikRH() {
         {/* ═══ PUBLICATIONS — fond cream ═══ */}
         <section className="pi-section pi-section--cream">
           <div className="pi-inner">
-            <span className="pi-tag">NOTRE ÉCOSYSTÈME</span>
-            <h2 className="pi-title">10 formats pour créer, partager & <span className="pi-red">innover</span></h2>
+            <span className="pi-tag">PHILOSOPHIE</span>
+            <h2 className="pi-title">Nos <span className="pi-red">convictions</span></h2>
             <div className="pi-grid pi-grid--2">
               <div className="pi-card pi-card--cream pi-card--border-left">
-                <h3 className="pi-card-title">Webinaires · Newsletter · Baromètre</h3>
-                <p className="pi-card-text">Sessions live RH, veille & actualités, données et enquêtes pour éclairer les décisions.</p>
+                <h3 className="pi-card-title">01 · Passion & impact durable</h3>
+                <p className="pi-card-text">Des professionnels passionnés par l'évolution des organisations et leurs impacts sur les hommes, pour créer de la valeur de manière durable.</p>
               </div>
               <div className="pi-card pi-card--cream pi-card--border-left">
-                <h3 className="pi-card-title">Masterclass · Publications</h3>
-                <p className="pi-card-text">Formations d'experts, articles et guides pour structurer les pratiques RH de demain.</p>
+                <h3 className="pi-card-title">02 · Compétences & croissance humaine</h3>
+                <p className="pi-card-text">Nous croyons que les compétences feront la différence : faire grandir les hommes fera grandir l'entreprise.</p>
               </div>
               <div className="pi-card pi-card--cream pi-card--border-left">
-                <h3 className="pi-card-title">Forum Annuel · Matins de la Fabrik RH · Mentors & pairs RH</h3>
-                <p className="pi-card-text">Des rendez-vous de réflexion, de transmission et de co-développement entre praticiens.</p>
+                <h3 className="pi-card-title">03 · Développement humain & valeur</h3>
+                <p className="pi-card-text">Associer développement humain et création de valeur au sein des organisations est une nécessité stratégique.</p>
               </div>
               <div className="pi-card pi-card--cream pi-card--border-left">
-                <h3 className="pi-card-title">Afterwork · Podcast</h3>
-                <p className="pi-card-text">Networking, lien communautaire et contenus audio pour diffuser les idées qui transforment.</p>
+                <h3 className="pi-card-title">04-05 · Innovation managériale & digital</h3>
+                <p className="pi-card-text">Promouvoir l'innovation en management, installer les soft skills comme prérequis, et faire du digital le moteur des transformations.</p>
               </div>
             </div>
           </div>
@@ -804,11 +806,11 @@ export default function FabrikRH() {
             <img src={PHOTO_LEADERSHIP} alt="Communauté Fabrik RH" />
           </div>
           <div className="fabrik-photo-immersive__content">
-            <div className="fabrik-photo-immersive__tag">NOS PARTENAIRES</div>
-            <h2 className="fabrik-photo-immersive__title">Un réseau de<span> </span><br />partenaires de confiance</h2>
+            <div className="fabrik-photo-immersive__tag">NOTRE ÉCOSYSTÈME</div>
+            <h2 className="fabrik-photo-immersive__title">10 formats pour créer,<br />partager & innover</h2>
             <p className="fabrik-photo-immersive__text">
-              La Fabrik RH s'appuie sur des partenaires de confiance pour accompagner
-              les entreprises et les organisations dans leurs transformations humaines.
+              Webinaires, newsletter, baromètre, masterclass, publications, forum annuel,
+              matins de la Fabrik RH, mentors & pairs RH, afterwork et podcast. La Fabrik RH s'appuie sur des partenaires de confiance pour vous accompagner.
             </p>
             <a className="fabrik-photo-immersive__btn" href="#fabrik-formulaire">Rejoindre la communauté →</a>
           </div>
@@ -817,33 +819,33 @@ export default function FabrikRH() {
         {/* ═══ REJOINDRE — fond dark ═══ */}
         <section className="pi-section pi-section--dark" id="rejoindre">
           <div className="pi-inner">
-            <span className="pi-tag">COMMUNAUTÉ</span>
-            <h2 className="pi-title pi-title--white">Rejoignez la <span className="pi-red">Communauté</span> Fabrik RH</h2>
-            <p className="pi-text pi-text--light">Fabriquons ensemble la RH de demain. Nous réunissons directions générales, DRH, experts, chercheurs, start-ups RH et professionnels passionnés.</p>
+            <span className="pi-tag">CIBLES & AUDIENCES</span>
+            <h2 className="pi-title pi-title--white">Nous <span className="pi-red">ciblons</span></h2>
+            <p className="pi-text pi-text--light">Directions générales, comités de direction, DRH, start-ups RH, fonds d'investissement, professeurs & chercheurs (universités, écoles privées, académiques et experts en sciences humaines), et professionnels passionnés nationaux & internationaux.</p>
             <div className="pi-grid pi-grid--4" style={{ marginBottom: "32px" }}>
               <div className="pi-mini-card">
                 <div className="pi-mini-icon">✓</div>
-                <h4>Directions & DRH</h4>
-                <p>Comités de direction, secrétaires généraux et fonctions RH.</p>
+                <h4>Directions générales</h4>
+                <p>Comités de direction & secrétaires généraux.</p>
+              </div>
+              <div className="pi-mini-card">
+                <div className="pi-mini-icon">✓</div>
+                <h4>DRH</h4>
+                <p>Directeurs des Ressources Humaines.</p>
               </div>
               <div className="pi-mini-card">
                 <div className="pi-mini-icon">✓</div>
                 <h4>Start-ups RH</h4>
-                <p>Innovation, EdTech et nouvelles approches du capital humain.</p>
+                <p>Innovations & EdTech dans le domaine RH.</p>
               </div>
               <div className="pi-mini-card">
                 <div className="pi-mini-icon">✓</div>
-                <h4>Professeurs & Chercheurs</h4>
-                <p>Universités, écoles et experts en sciences humaines.</p>
-              </div>
-              <div className="pi-mini-card">
-                <div className="pi-mini-icon">✓</div>
-                <h4>Réseau international</h4>
-                <p>Professionnels nationaux et internationaux engagés.</p>
+                <h4>Fonds d'investissement</h4>
+                <p>Impact investing & capital humain.</p>
               </div>
             </div>
             <p className="pi-text pi-text--light" style={{ textAlign: "center" }}>
-              Formulaire d'inscription ci-dessous.
+              Rejoignez la communauté : fabriquons ensemble la RH de demain.
             </p>
           </div>
         </section>
