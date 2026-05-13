@@ -98,7 +98,7 @@ export default function Blog() {
       <section className="pi-section pi-section--cream">
         <div className="pi-inner">
           <span className="pi-tag">NOS ACTUALITÉS</span>
-          <h2 className="pi-title">Les réflexions de <span className="pi-red">Jamal Belahrach</span></h2>
+          <h2 className="pi-title">Nos <span className="pi-red">réflexions</span></h2>
           <p className="pi-text" style={{textAlign: 'justify'}}>Retrouvez les articles, analyses et éditos de notre expert sur les enjeux actuels du monde du travail, du leadership et de la transformation organisationnelle.</p>
         </div>
       </section>
