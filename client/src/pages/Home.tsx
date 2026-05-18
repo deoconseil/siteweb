@@ -448,7 +448,9 @@ export default function Home() {
           </ul>
           <div className="nav-right">
             <button className="nav-cta-outline" onClick={(e) => { e.preventDefault(); openModal(); }}>↓ Catalogue</button>
-            <a href="/performanse" className="nav-cta">Performanse</a>
+            <a href="/performanse" className="nav-cta nav-cta-logo">
+              <img src="/images/performanse-header-logo.png" alt="Performanse" className="nav-cta-logo-img" />
+            </a>
             <a href="#contact" className="nav-cta">Parlons-en</a>
           </div>
           <button className="mobile-toggle" onClick={() => setMobileOpen(!mobileOpen)}>

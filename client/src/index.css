@@ -160,6 +160,18 @@ nav:not(.admin-sidebar__nav) {
   white-space: nowrap;
 }
 .nav-cta:hover { opacity: .85; }
+.nav-cta-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 14px;
+}
+.nav-cta-logo-img {
+  display: block;
+  height: 16px;
+  width: auto;
+  max-width: 110px;
+}
 .nav-spacer { height: 100px; }
 
 /* ── Mobile Toggle & Menu ── */
@@ -1869,6 +1881,8 @@ nav:not(.admin-sidebar__nav) {
   .nav-right { gap: 8px; }
   .nav-cta-outline { padding: 7px 12px; font-size: 9px; }
   .nav-cta { padding: 8px 14px; font-size: 9px; }
+  .nav-cta-logo { padding: 8px 10px; }
+  .nav-cta-logo-img { height: 12px; max-width: 84px; }
   .nav-spacer { height: 90px; }
   .mobile-toggle { display: block; }
   .mobile-menu { display: flex; }
@@ -2037,6 +2051,8 @@ nav:not(.admin-sidebar__nav) {
   .nav-logo img { height: 30px; }
   .nav-cta-outline { padding: 6px 10px; font-size: 8px; }
   .nav-cta { padding: 6px 10px; font-size: 8px; }
+  .nav-cta-logo { padding: 6px 8px; }
+  .nav-cta-logo-img { height: 10px; max-width: 70px; }
   .nav-spacer { height: 80px; }
   .mobile-menu a { padding: 10px 16px; font-size: 13px; }
 
