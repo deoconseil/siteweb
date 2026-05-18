@@ -168,9 +168,9 @@ nav:not(.admin-sidebar__nav) {
 }
 .nav-cta-logo-img {
   display: block;
-  height: 16px;
+  height: 18px;
   width: auto;
-  max-width: 110px;
+  max-width: 124px;
 }
 .nav-spacer { height: 100px; }
 
@@ -1882,7 +1882,7 @@ nav:not(.admin-sidebar__nav) {
   .nav-cta-outline { padding: 7px 12px; font-size: 9px; }
   .nav-cta { padding: 8px 14px; font-size: 9px; }
   .nav-cta-logo { padding: 8px 10px; }
-  .nav-cta-logo-img { height: 12px; max-width: 84px; }
+  .nav-cta-logo-img { height: 13px; max-width: 92px; }
   .nav-spacer { height: 90px; }
   .mobile-toggle { display: block; }
   .mobile-menu { display: flex; }
@@ -2052,7 +2052,7 @@ nav:not(.admin-sidebar__nav) {
   .nav-cta-outline { padding: 6px 10px; font-size: 8px; }
   .nav-cta { padding: 6px 10px; font-size: 8px; }
   .nav-cta-logo { padding: 6px 8px; }
-  .nav-cta-logo-img { height: 10px; max-width: 70px; }
+  .nav-cta-logo-img { height: 11px; max-width: 78px; }
   .nav-spacer { height: 80px; }
   .mobile-menu a { padding: 10px 16px; font-size: 13px; }
 
