@@ -3,7 +3,7 @@ import ActualitesSection from "@/components/ActualitesSection";
 import NewsletterSection from "@/components/NewsletterSection";
 
 const BANNER_IMG = "https://d2xsxph8kpxj0f.cloudfront.net/89599327/Kg3MR7aJ6wLfgVCatcFEoP/photo-conference_f372139c.jpg";
-const PERFORMANSE_LOGO = "/images/performanse-logo.png";
+const PERFORMANSE_LOGO = "/images/performanse-header-logo.png";
 
 const BENEFICES = [
   {
@@ -43,13 +43,10 @@ export default function Performanse() {
         <div className="page-hero page-hero--img" style={{ backgroundImage: `url(${BANNER_IMG})` }}>
           <div className="page-hero__overlay"></div>
           <div className="page-hero__content">
-            <img
-              src={PERFORMANSE_LOGO}
-              alt="Logo PerformanSe"
-              style={{ width: "120px", height: "120px", objectFit: "contain", margin: "0 auto 12px" }}
-            />
             <span className="page-hero__tag">OUTILS & METHODES</span>
-            <h1>Performan<em>Se</em></h1>
+            <h1 className="performanse-hero-wordmark">
+              <img src={PERFORMANSE_LOGO} alt="PerformanSe" />
+            </h1>
             <p>Distributeur exclusif au Maroc via DEO Conseil pour vos assessments RH.</p>
             <div className="page-hero__accent"></div>
           </div>
@@ -135,11 +132,7 @@ export default function Performanse() {
 
         <section className="pi-section pi-section--red">
           <div className="pi-inner pi-center">
-            <img
-              src={PERFORMANSE_LOGO}
-              alt="Logo PerformanSe"
-              style={{ width: "108px", height: "108px", objectFit: "contain", margin: "0 auto 14px" }}
-            />
+            <img src={PERFORMANSE_LOGO} alt="PerformanSe" className="performanse-cta-logo" />
             <h2 className="pi-title pi-title--white">Besoin d'un assessment adapte a votre contexte ?</h2>
             <p className="pi-text pi-text--white" style={{ textAlign: "center" }}>
               Nous vous aidons a choisir l'outil le plus pertinent selon vos objectifs RH.
