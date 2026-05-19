@@ -170,6 +170,7 @@ const botResponses: Record<string, string> = {
 export default function Home() {
   /* ── State ── */
   const [openAdn, setOpenAdn] = useState(0);
+  const [homePopupOpen, setHomePopupOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
@@ -203,6 +204,11 @@ export default function Home() {
 
   useEffect(() => {
     const t = setTimeout(() => setShowNotif(false), 4000);
+    return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    const t = setTimeout(() => setHomePopupOpen(true), 700);
     return () => clearTimeout(t);
   }, []);
 
@@ -940,6 +946,15 @@ export default function Home() {
     <NewsletterSection />
       <ActualitesSection />
       <SiteFooter />
+
+      {homePopupOpen && (
+        <div className="home-popup-overlay" onClick={(e) => { if (e.target === e.currentTarget) setHomePopupOpen(false); }}>
+          <div className="home-popup-box">
+            <button className="home-popup-close" onClick={() => setHomePopupOpen(false)} aria-label="Fermer la popup">X</button>
+            <img src="/images/journee-rh-popup.png" alt="Journee RH" className="home-popup-image" />
+          </div>
+        </div>
+      )}
 
       {/* ═══ MODAL CATALOGUE ═══ */}
       {modalOpen && (
