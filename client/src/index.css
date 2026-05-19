@@ -171,12 +171,19 @@ nav:not(.admin-sidebar__nav) {
 }
 .nav-cta-logo:hover {
   opacity: .9;
+  transform: none !important;
 }
 .nav-cta-logo-img {
   display: block;
   height: 22px;
   width: auto;
   max-width: 190px;
+  animation: none !important;
+  transform: none !important;
+}
+.nav-cta-logo-img:hover {
+  animation: none !important;
+  transform: none !important;
 }
 .nav-spacer { height: 100px; }
 
