@@ -447,8 +447,8 @@ export default function Home() {
             <li><a href="/blog">Blog DEO</a></li>
           </ul>
           <div className="nav-right">
-            <a href="/performanse" className="nav-cta nav-cta-logo">
-              <img src="/images/performanse-header-logo.png" alt="Performanse" className="nav-cta-logo-img" />
+            <a href="/performanse" className="nav-cta-logo">
+              <img src="/images/performanse-header-button-logo.png" alt="Performanse" className="nav-cta-logo-img" />
             </a>
             <button className="nav-cta-outline" onClick={(e) => { e.preventDefault(); openModal(); }}>↓ Catalogue</button>
             <a href="#contact" className="nav-cta">Parlons-en</a>

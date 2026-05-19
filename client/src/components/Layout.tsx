@@ -79,8 +79,8 @@ export default function Layout({ children }: LayoutProps) {
             <li><a href="/blog" className={location === '/blog' ? 'nav-active' : ''}>Blog DEO</a></li>
           </ul>
           <div className="nav-right">
-            <a href="/performanse" className={`nav-cta nav-cta-logo ${location === '/performanse' ? 'nav-active' : ''}`}>
-              <img src="/images/performanse-header-logo.png" alt="Performanse" className="nav-cta-logo-img" />
+            <a href="/performanse" className={`nav-cta-logo ${location === '/performanse' ? 'nav-active' : ''}`}>
+              <img src="/images/performanse-header-button-logo.png" alt="Performanse" className="nav-cta-logo-img" />
             </a>
             <button className="nav-cta-outline" onClick={(e) => { e.preventDefault(); setShowModal(true); setModalSubmitted(false); }}>↓ Catalogue</button>
             <a href="#contact" className="nav-cta">Parlons-en</a>
